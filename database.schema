@@ -1,0 +1,26 @@
+DROP TABLE IF EXISTS User;
+DROP TABLE IF EXISTS Message;
+DROP TABLE IF EXISTS Session;
+
+CREATE TABLE User
+	(id INTEGER PRIMARY KEY AUTOINCREMENT,
+         firstname TEXT,
+         familyname TEXT,
+         gender TEXT,
+         city TEXT,
+         country TEXT,
+         email TEXT,
+         password TEXT);
+
+CREATE TABLE Message
+         (id INTEGER PRIMARY KEY AUTOINCREMENT,
+          fromId INTEGER,
+          toId INTEGER,
+          msg TEXT,
+          FOREIGN KEY(fromId) REFERENCES User(id)
+          FOREIGN KEY(toId) REFERENCES User(id));
+
+CREATE TABLE Session
+          (token TEXT PRIMARY KEY,
+           userId INTEGER,
+           FOREIGN KEY(userId) REFERENCES User(id));

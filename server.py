@@ -9,6 +9,7 @@ import string
 import random
 import json
 import re
+import crypto
 
 from User import User
 from Message import Message, MessageList
@@ -96,24 +97,27 @@ def sign_in():
         userId = db.get_userId_by_email(data["email"])
         if userId == None:
             return ReturnedData(False, "Email not found").createJSON()
-        elif db.get_user_by_id(userId).password != data["password"]:
-            return ReturnedData(False, "The password is not correct").createJSON()
         else:
-            print "Connected users"+str(connected_users) # debug
-            if data["email"] in connected_users:
-                s = connected_users[data["email"]]
-                s.send(ReturnedData(False, "close:session").createJSON())
-                db.delete_token_by_email(data["email"])
-                del connected_users[data["email"]]
+            user = db.get_user_by_id(userId)
+            print
+            if user.password != crypto.get_hash(data["password"], user.salt):
+                return ReturnedData(False, "The password is not correct").createJSON()
+            else:
+                print "Connected users"+str(connected_users) # debug
+                if data["email"] in connected_users:
+                    s = connected_users[data["email"]]
+                    s.send(ReturnedData(False, "close:session").createJSON())
+                    db.delete_token_by_email(data["email"])
+                    del connected_users[data["email"]]
 
-            token = token_generator()
+                token = token_generator()
 
-            db.insert_token(token, userId)
-            jToken = {}
-            jToken["token"] = token
-            jToken = json.dumps(jToken)
+                db.insert_token(token, userId)
+                jToken = {}
+                jToken["token"] = token
+                jToken = json.dumps(jToken)
 
-            return ReturnedData(True, "User signed in", jToken).createJSON()
+                return ReturnedData(True, "User signed in", jToken).createJSON()
     except:
         abort(500)
 
@@ -127,7 +131,9 @@ def sign_up():
         if db.get_userId_by_email(data["email"]) != None:  # no success
             return ReturnedData(False, "Email already exists").createJSON()
         else:
-            user = User(data["email"], data["password"], data["firstname"],
+            salt = crypto.create_salt()
+            hashed_pw = crypto.get_hash(data["password"], salt)
+            user = User(data["email"], hashed_pw, salt, data["firstname"],
                         data["familyname"], data["gender"], data["city"], data["country"])
             db.insert_user(user)
             return ReturnedData(True, "User successfully created").createJSON()

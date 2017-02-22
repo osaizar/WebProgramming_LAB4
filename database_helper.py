@@ -34,10 +34,10 @@ def create_tables():
 
 def insert_user(user):
     cur = run_query("INSERT INTO User (firstname, familyname, gender, city, \
-                    country, email, password) \
-                    VALUES('%s','%s','%s','%s','%s','%s','%s')" % (user.firstname,
+                    country, email, password, salt) \
+                    VALUES('%s','%s','%s','%s','%s','%s','%s', '%s')" % (user.firstname,
                                                                    user.familyname, user.gender, user.city, user.country,
-                                                                   user.email, user.password))
+                                                                   user.email, user.password, user.salt))
     if cur.rowcount == 1:
         return True
     else:
@@ -48,7 +48,7 @@ def get_user_by_id(userId):
     cur = run_query("SELECT * FROM User WHERE User.id = %s" % userId)
     result = cur.fetchone()
     if result:
-        user = User(result["email"], result["password"], result["firstname"],
+        user = User(result["email"], result["password"], result["salt"], result["firstname"],
                     result["familyname"], result["gender"], result["city"], result["country"])
     else:
         user = None

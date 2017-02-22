@@ -2,7 +2,7 @@ import json
 
 class User(object):
 
-    def __init__(self, email, password, firstname, familyname, gender, city, country):
+    def __init__(self, email, password, salt, firstname, familyname, gender, city, country):
         self.firstname = firstname
         self.familyname = familyname
         self.email = email
@@ -10,6 +10,7 @@ class User(object):
         self.country = country
         self.gender = gender
         self.password = password
+        self.salt = salt
 
     def User(self):
         return self

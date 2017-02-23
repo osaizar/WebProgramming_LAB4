@@ -44,10 +44,8 @@ function sendHTTPRequest(data, url, method, onResponse){
 function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
-      alert("sending ws: "+JSON.stringify(data));
       socket.send(JSON.stringify(data));
       socket.onmessage = function(s){
-        alert("ws got "+s.data);
         response = JSON.parse(s.data);
         if (!response.success){
           handleSocketError(response.message)
@@ -110,8 +108,15 @@ function signIn() {
 
 
 function showSignUpError(message) { // se usa en sigUp y signIn
-    document.getElementById("messageSignUp").innerHTML = message;
+    document.getElementById("messageSignUpErr").innerHTML = message;
     document.getElementById("signUpError").style.display = "block";
+    document.getElementById("signUpSuccess").style.display = "none";
+}
+
+function showSignUpSuccess(message) { // se usa en sigUp y signIn
+    document.getElementById("messageSignUpSucc").innerHTML = message;
+    document.getElementById("signUpSuccess").style.display = "block";
+    document.getElementById("signUpError").style.display = "none";
 }
 
 
@@ -152,6 +157,8 @@ function signUp() {
     sendHTTPRequest(user, "/sign_up", "POST", function(server_msg){
       if (!server_msg.success) {
           showSignUpError(server_msg.message);
+      }else{
+        showSignUpSuccess(server_msg.message)
       }
     });
     return false;

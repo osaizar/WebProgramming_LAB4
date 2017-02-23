@@ -34,10 +34,6 @@ def clientjs():
 def clientcss():
     return app.send_static_file("client.css")
 
-@app.route("/serverstub.js")
-def serverstubjs():
-    return app.send_static_file("serverstub.js")
-
 @app.route("/wimage.png")
 def wimage():
     return app.send_static_file("wimage.png")

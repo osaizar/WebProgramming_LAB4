@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sqlite3
+from datetime import datetime
 from User import User
 from Message import Message, MessageList
 
@@ -88,6 +89,12 @@ def change_user_password(userId, password):
     else:
         return False
 
+def get_user_number():
+    cur = run_query("SELECT COUNT(*) as 'count' FROM User")
+    result = cur.fetchone()
+
+    return result["count"]
+
 
 def insert_token(token, userId):
     cur = run_query("INSERT INTO Session (token, userId)\
@@ -116,6 +123,12 @@ def delete_token(token):
     else:
         return False
 
+def get_session_number():
+        cur = run_query("SELECT COUNT(*) as 'count' FROM Session")
+        result = cur.fetchone()
+
+        return result["count"]
+
 def delete_token_by_email(email):
     cur = run_query("DELETE FROM Session WHERE userId = (SELECT id \
                                                          FROM User \
@@ -139,8 +152,7 @@ def insert_message(message):
 
 
 def get_messages_by_user(userId):
-    cur = run_query(
-        "SELECT msg, toId, fromId FROM Message WHERE toId = %s" % userId)
+    cur = run_query("SELECT msg, toId, fromId FROM Message WHERE toId = %s" % userId)
 
     result = cur.fetchall()
     msgs = MessageList()
@@ -150,3 +162,14 @@ def get_messages_by_user(userId):
         msgs.append(Message(writer.email, reader.email, msg["msg"]))
 
     return msgs
+
+def insert_connection(userId):
+        cur = run_query("INSERT INTO Connection (timestamp, userId)\
+                        VALUES ('%s',%s)" % (datetime.now, userId))
+        if cur.rowcount == 1:
+            return True
+        else:
+            return False
+
+def get_connection_number():
+    pass

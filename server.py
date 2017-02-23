@@ -45,6 +45,7 @@ def index():
 # END route declarations
 
 
+# START WS functions
 @app.route("/connect")
 def connect():
     if request.environ.get("wsgi.websocket"):
@@ -79,6 +80,47 @@ def connect():
 
     return ""
 
+@app.route("/get_current_conn_users")
+def get_current_conn_users():
+    ws = request.environ['wsgi.websocket']
+    data = ws.receive()
+    data = json.loads(data)
+    valid, response = checker.check_token(data)
+    if not valid:
+        ws.send(response)
+        return ""
+    userId = db.get_userId_by_token(data["token"])
+    if userId == None:
+        ws.send(ReturnedData(False, "You are not loged in!").createJSON())
+        return ""
+    total_users = db.get_user_number()
+    conn_users = db.get_session_number()
+    rt = {}
+    rt["totalUsers"] = tota_users
+    rt["connectedUsers"] = conn_users
+    rt = json.dumps(rt)
+    ws.send(ReturnedData(True, "Data got", rt).createJSON())
+    return ""
+
+
+@app.route("get_conn_user_history")
+def get_conn_user_history():
+    ws = request.environ['wsgi.websocket']
+    data = ws.receive()
+    data = json.loads(data)
+    valid, response = checker.check_token(data)
+    if not valid:
+        ws.send(response)
+        return ""
+    userId = db.get_userId_by_token(data["token"])
+    if userId == None:
+        ws.send(ReturnedData(False, "You are not loged in!").createJSON())
+        return ""
+
+    
+
+
+# END WS functions
 
 def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))

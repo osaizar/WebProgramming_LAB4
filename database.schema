@@ -25,3 +25,9 @@ CREATE TABLE Session
           (token TEXT PRIMARY KEY,
            userId INTEGER,
            FOREIGN KEY(userId) REFERENCES User(id));
+
+CREATE TABLE Connection
+         (id INTEGER PRIMARY KEY AUTOINCREMENT,
+				 	[timestamp] timestamp,
+					userId INTEGER,
+					FOREIGN KEY(userId) REFERENCES User(id));

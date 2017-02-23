@@ -93,17 +93,18 @@ def get_current_conn_users():
     if userId == None:
         ws.send(ReturnedData(False, "You are not loged in!").createJSON())
         return ""
+
     total_users = db.get_user_number()
     conn_users = db.get_session_number()
     rt = {}
     rt["totalUsers"] = tota_users
     rt["connectedUsers"] = conn_users
     rt = json.dumps(rt)
-    ws.send(ReturnedData(True, "Data got", rt).createJSON())
+    ws.send(ReturnedData(True, "Got Data", rt).createJSON())
     return ""
 
 
-@app.route("get_conn_user_history")
+@app.route("/get_conn_user_history")
 def get_conn_user_history():
     ws = request.environ['wsgi.websocket']
     data = ws.receive()
@@ -117,7 +118,10 @@ def get_conn_user_history():
         ws.send(ReturnedData(False, "You are not loged in!").createJSON())
         return ""
 
-    
+    conn = db.get_today_connections()
+    conn = json.dumps(conn)
+    ws.send(ReturnedData(True, "Got Data", conn).createJSON())
+    return ""
 
 
 # END WS functions

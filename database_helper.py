@@ -164,7 +164,7 @@ def get_messages_by_user(userId):
     return msgs
 
 def insert_connection(userId):
-        cur = run_query("INSERT INTO Connection (timestamp, userId)\
+        cur = run_query("INSERT INTO Connection (date, userId)\
                         VALUES ('%s',%s)" % (str(datetime.now()), userId))
         if cur.rowcount == 1:
             return True
@@ -172,10 +172,10 @@ def insert_connection(userId):
             return False
 
 def get_connections_between(date1, date2):
-    cur = run_query("SELECT COUNT(*) as 'count' WHERE timestamp > '%s' \
-                    and '%s' > timestamp" % (date1, date2))
+    cur = run_query("SELECT COUNT(*) as 'count' from Connection WHERE date > '%s' \
+                    and '%s' > date" % (date1, date2))
 
-    result = cur.fetchall()
+    result = cur.fetchone()
 
     return result["count"]
 
@@ -184,7 +184,8 @@ def get_today_connections():
     connections = {}
     for i in range(24):
         now = today+" "+str(i)+":00"
-        afternow = now = today+" "+str(i+1)+":00"
+        afternow = today+" "+str(i+1)+":00"
+        print now+" "+afternow
         connections[i] = get_connections_between(now, afternow)
 
     return connections

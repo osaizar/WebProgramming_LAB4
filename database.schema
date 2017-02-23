@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Message;
 DROP TABLE IF EXISTS Session;
+DROP TABLE IF EXISTS Connection;
 
 CREATE TABLE User
 	(id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,6 +29,6 @@ CREATE TABLE Session
 
 CREATE TABLE Connection
          (id INTEGER PRIMARY KEY AUTOINCREMENT,
-				 	[timestamp] timestamp,
+				 	date timestamp,
 					userId INTEGER,
 					FOREIGN KEY(userId) REFERENCES User(id));

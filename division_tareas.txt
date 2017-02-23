@@ -1,0 +1,16 @@
+Providing live data presentation (3 points) Oier
+
+Drag and Drop (1 point) Isma
+
+Client Side Routing(1 point) Isma
+
+Third-party Aurth (1 point) Isma
+
+Further Security measures (2 points) Oier
+
+Testing Using Selenium (2 points) Isma
+
+Bootstrap (2 points) Entre los dos
+
+
+12 puntos en total, objetivo -> 9

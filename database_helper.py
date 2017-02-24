@@ -181,9 +181,13 @@ def get_connections_between(date1, date2):
 
 def get_today_connections():
     today = str(datetime.now()).split(" ")[0]
+    yesterday = today.split("-")[0]+"-"+today.split("-")[1]+"-"+str(int(today.split("-")[2])+1)
     connections = {}
     for i in range(24):
-        now = today+" "+str(i)+":00"
+        if i == 0:
+            now = yesterday+" 24:00"
+        else:
+            now = today+" "+str(i)+":00"
         afternow = today+" "+str(i+1)+":00"
         print now+" "+afternow
         connections[i] = get_connections_between(now, afternow)

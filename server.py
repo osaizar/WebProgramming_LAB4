@@ -16,15 +16,29 @@ from Message import Message, MessageList
 from ReturnedData import ReturnedData
 
 
+#TODO: WS exceptions
+#TODO: Dividir en archivos
 
 app = Flask(__name__)
 
 LPORT = 8080
 LADDR = "127.0.0.1"
 
-connected_users = dict()# List of dictionaries (email and socket)
+connected_users = dict()# dict (email and socket)
 
 # START route declarations
+
+@app.route("/lib/c3-0.4.11/c3.min.css")
+def libc3css():
+    return app.send_static_file("lib/c3-0.4.11/c3.min.css")
+
+@app.route("/lib/c3-0.4.11/c3.min.js")
+def libc3js():
+    return app.send_static_file("lib/c3-0.4.11/c3.min.js")
+
+@app.route("/lib/d3/d3.v3.min.js")
+def libd3js():
+    return app.send_static_file("lib/d3/d3.min.js")
 
 @app.route("/client.js")
 def clientjs():

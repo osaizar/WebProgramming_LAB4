@@ -1,3 +1,6 @@
+// TODO: Cambiar nombres de las funciones de diagramas
+// TODO: Dividir en archivos distintos
+
 //Costant declarations
 const WELCOME = "welcomeview";
 const PROFILE = "profileview";
@@ -91,24 +94,102 @@ function connectToWebSocket(){
 function renderConnectedUserDiagram(){
   var data = {"token": localStorage.getItem("token")};
   sendToWebSocket(data, "/get_current_conn_users", function(server_msg){
-    if(!server_msg.success){
-      //??
-    }else{
-      // fill donut chart
-    }
+  var jdata = {};
+  var fields = [];
+
+  fields.push("Total Users");
+  fields.push("Not Connected Users");
+  jdata["Not Connected Users"] = server_msg.data.totalUsers-server_msg.data.connectedUsers;
+  jdata["Connected Users"] = server_msg.data.connectedUsers;
+
+  var diagram1 = c3.generate({
+    bindto: '#diagram1',
+    data: {
+        json: [ jdata ],
+        keys: {
+          value: fields,
+        },
+        type:'donut'
+      },
   });
+});
 }
 
 function renderUserHistoryDiagram(){
   var data = {"token": localStorage.getItem("token")};
   sendToWebSocket(data, "/get_conn_user_history", function(server_msg){
-    if(!server_msg.success){
-      //??
-    }else{
-      // fill bar chart
+
+      var x = [];
+      var data = [];
+      var i = 0;
+      x[0] = "Hour";
+      data[0] = "Connected users";
+
+      var arr = Object.keys(server_msg.data).map(function(k) { return server_msg.data[k] });
+
+      for(var i = 0; i < arr.length; i++){
+        x[i+1] = i+":00";
+        data[i+1] = arr[i];
+      }
+
+      var chart = c3.generate({
+        bindto: '#diagram1',
+        data: {
+            x: 'Hour',
+            xFormat: '%H:%M',
+            columns: [
+              x,
+              data,
+            ]
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                tick: {
+                    format: '%H:%M'
+                }
+            }
+        }
+      });
+    });
+}
+
+function generateCommentDiagram(){
+  var token = localStorage.getItem("token");
+  sendHTTPRequest({"token":token}, "/get_user_messages_by_token", "POST", function(server_msg) {
+    var messages;
+    var jdata = {};
+    var fields = [];
+
+    if (server_msg.success) {
+        messages = server_msg.data;
+    } else {
+        return -1; //error
     }
+
+    for (var i = 0; i < messages.length; i++) {
+      var writer = messages[i].writer;
+      if (fields.indexOf(writer) == -1){
+        fields.push(writer);
+        jdata[writer] = 1;
+      }else{
+        jdata[writer] = jdata[writer]+1;
+      }
+    }
+
+    var diagram1 = c3.generate({
+      bindto: '#diagram1',
+      data: {
+          json: [ jdata ],
+          keys: {
+            value: fields,
+          },
+          type:'pie'
+        },
+    });
   });
 }
+
 
 function signIn() {
 

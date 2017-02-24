@@ -52,7 +52,6 @@ function sendToWebSocket(data, url, onRespose){
         }else{
           onRespose(response);
         }
-        onRespose(response);
       };
     }, socket);
 }
@@ -85,6 +84,28 @@ function connectToWebSocket(){
   sendToWebSocket(data, "/connect", function(server_msg){
     if(!server_msg.success){
       signOut();
+    }
+  });
+}
+
+function renderConnectedUserDiagram(){
+  var data = {"token": localStorage.getItem("token")};
+  sendToWebSocket(data, "/get_current_conn_users", function(server_msg){
+    if(!server_msg.success){
+      //??
+    }else{
+      // fill donut chart
+    }
+  });
+}
+
+function renderUserHistoryDiagram(){
+  var data = {"token": localStorage.getItem("token")};
+  sendToWebSocket(data, "/get_conn_user_history", function(server_msg){
+    if(!server_msg.success){
+      //??
+    }else{
+      // fill bar chart
     }
   });
 }

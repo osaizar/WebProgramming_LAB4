@@ -110,12 +110,24 @@
                     </ul>
                 </div>
                 <form id="msgForm">
-                  <div>
-                      <label for="message">Message</label>
-                      <input type="text" name="message" id="msgToMe" required>
+                  <div class="form-group">
+                      <h3> Message </h3>
+                      <input class="form-control" type="text" name="message" id="msgToMe" required>
                   </div>
-                  <input class="button" type="submit" value="Send message">
+                  <input class="btn btn-default" type="submit" value="Send message">
                 </form>
+                <div>
+                  <h3>Current users</h3>
+                  <div id="diagram0"></div>
+                </div>
+                <div>
+                  <h3>Connection history</h3>
+                  <div id="diagram1"></div>
+                </div>
+                <div>
+                  <h3>Comments</h3>
+                  <div id="diagram2"></div>
+                </div>
               </div>
               <div class="col-md-8">
                 <input id="userMsgReloadButton" class="button" type="submit" value="Reload Messages">

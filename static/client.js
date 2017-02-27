@@ -19,6 +19,7 @@ displayView = function() {
         bindFunctionsProfile();
         connectToWebSocket();
         renderCurrentUserPage();
+        renderDiagrams();
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
     }
@@ -104,19 +105,25 @@ function connectToWebSocket(){
 
 // START diagrams
 
+function renderDiagrams() {
+  renderConnectedUserDiagram();
+  renderUserHistoryDiagram();
+  generateCommentDiagram();
+}
+
 function renderConnectedUserDiagram(){
   var data = {"token": localStorage.getItem("token")};
   sendToWebSocket(data, "/get_current_conn_users", function(server_msg){
   var jdata = {};
   var fields = [];
 
-  fields.push("Total Users");
+  fields.push("Connected Users");
   fields.push("Not Connected Users");
   jdata["Not Connected Users"] = server_msg.data.totalUsers-server_msg.data.connectedUsers;
   jdata["Connected Users"] = server_msg.data.connectedUsers;
 
   var diagram1 = c3.generate({
-    bindto: '#diagram1',
+    bindto: '#diagram0',
     data: {
         json: [ jdata ],
         keys: {
@@ -124,8 +131,11 @@ function renderConnectedUserDiagram(){
         },
         type:'donut'
       },
+      donut: {
+        expand: false
+      }
+    });
   });
-});
 }
 
 
@@ -192,8 +202,11 @@ function generateCommentDiagram(){
       }
     }
 
+
+    alert(JSON.stringify(jdata));
+
     var diagram1 = c3.generate({
-      bindto: '#diagram1',
+      bindto: '#diagram2',
       data: {
           json: [ jdata ],
           keys: {

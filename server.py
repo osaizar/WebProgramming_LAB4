@@ -77,7 +77,6 @@ def connect():
     if request.environ.get("wsgi.websocket"):
         ws = request.environ['wsgi.websocket']
         data = ws.receive()
-        print "Got data: "+str(data) # debug
         data = json.loads(data)
         valid, response = checker.check_token(data)
         if not valid:
@@ -90,7 +89,6 @@ def connect():
 
         email = db.get_user_by_id(userId).email
         connected_users[email] = ws
-        print "The new socket is "+str(ws)
 
         while True: # keep socket open
             try:
@@ -123,7 +121,7 @@ def get_current_conn_users():
     total_users = db.get_user_number()
     conn_users = db.get_session_number()
     rt = {}
-    rt["totalUsers"] = tota_users
+    rt["totalUsers"] = total_users
     rt["connectedUsers"] = conn_users
     rt = json.dumps(rt)
     ws.send(ReturnedData(True, "Got Data", rt).createJSON())
@@ -167,11 +165,9 @@ def sign_in():
             return ReturnedData(False, "Email not found").createJSON()
         else:
             user = db.get_user_by_id(userId)
-            print
             if user.password != crypto.get_hash(data["password"], user.salt):
                 return ReturnedData(False, "The password is not correct").createJSON()
             else:
-                print "Connected users"+str(connected_users) # debug
                 if data["email"] in connected_users:
                     s = connected_users[data["email"]]
                     s.send(ReturnedData(False, "close:session").createJSON())
@@ -184,6 +180,8 @@ def sign_in():
                 jToken = {}
                 jToken["token"] = token
                 jToken = json.dumps(jToken)
+
+                db.insert_connection(userId)
 
                 return ReturnedData(True, "User signed in", jToken).createJSON()
     except:
@@ -216,13 +214,11 @@ def sign_out():
         return response
     try:
         userId = db.get_userId_by_token(data["token"])
-        print "Connected users"+str(connected_users)
         if userId != None:
             email = db.get_user_by_id(userId).email
             if email != None:
                 if db.delete_token(data["token"]):
                     del connected_users[email]
-                    print "Connected users"+str(connected_users)
                 return ReturnedData(True, "Signed out").createJSON()
             else:
                 return ReturnedData(True, "Invalid email").createJSON() # no deberia salir nunca

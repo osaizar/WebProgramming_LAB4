@@ -18,6 +18,7 @@ displayView = function() {
     if (viewId == PROFILE) {
         bindFunctionsProfile();
         connectToWebSocket();
+        renderCurrentUserPage();
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
     }
@@ -27,6 +28,9 @@ displayView = function() {
 window.onload = function() {
     displayView();
 };
+
+
+// START request handlers
 
 function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
@@ -44,6 +48,7 @@ function sendHTTPRequest(data, url, method, onResponse){
     }
 }
 
+
 function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
@@ -59,6 +64,7 @@ function sendToWebSocket(data, url, onRespose){
     }, socket);
 }
 
+
 function handleSocketError(message) {
   switch (message) {
     case "close:session":
@@ -72,6 +78,7 @@ function handleSocketError(message) {
   }
 }
 
+
 function waitForConnection(callback, socket){
   if(socket.readyState == 1){
     callback();
@@ -82,6 +89,7 @@ function waitForConnection(callback, socket){
   }
 }
 
+
 function connectToWebSocket(){
   var data = {"token": localStorage.getItem("token")};
   sendToWebSocket(data, "/connect", function(server_msg){
@@ -90,6 +98,11 @@ function connectToWebSocket(){
     }
   });
 }
+
+// END request handlers
+
+
+// START diagrams
 
 function renderConnectedUserDiagram(){
   var data = {"token": localStorage.getItem("token")};
@@ -114,6 +127,7 @@ function renderConnectedUserDiagram(){
   });
 });
 }
+
 
 function renderUserHistoryDiagram(){
   var data = {"token": localStorage.getItem("token")};
@@ -154,6 +168,7 @@ function renderUserHistoryDiagram(){
     });
 }
 
+
 function generateCommentDiagram(){
   var token = localStorage.getItem("token");
   sendHTTPRequest({"token":token}, "/get_user_messages_by_token", "POST", function(server_msg) {
@@ -190,6 +205,10 @@ function generateCommentDiagram(){
   });
 }
 
+// END diagrams
+
+
+// START client side functions
 
 function signIn() {
 
@@ -214,6 +233,7 @@ function showSignUpError(message) { // se usa en sigUp y signIn
     document.getElementById("signUpError").style.display = "block";
     document.getElementById("signUpSuccess").style.display = "none";
 }
+
 
 function showSignUpSuccess(message) { // se usa en sigUp y signIn
     document.getElementById("messageSignUpSucc").innerHTML = message;
@@ -279,6 +299,7 @@ function signOut() {
     });
 }
 
+
 function openTab(tabName) {
 
     var i;
@@ -290,11 +311,6 @@ function openTab(tabName) {
     }
 
     document.getElementById(tabName).style.display = "block";
-
-
-    /*if (tabName == "home") {
-        renderCurrentUserPage();
-    }*/
 }
 
 
@@ -314,12 +330,14 @@ function changePassword() {
     return false;
 }
 
+
 function showChangePasswordError(message) { // se usa en signOut tambien
     document.getElementById("messageChPassword").innerHTML = message;
     document.getElementById("chPasswordError").style.display = "block";
 
     document.getElementById("chPasswordSuccess").style.display = "none";
 }
+
 
 function showChangePasswordSuccess(message) {
     document.getElementById("messageChPasswordS").innerHTML = message;
@@ -473,8 +491,6 @@ function showSearchError(message) {
 }
 
 
-
-
 function renderOtherUserPage(userData) {
 
     document.getElementById("othNameField").innerHTML = userData.firstname;
@@ -491,6 +507,8 @@ function renderOtherUserPage(userData) {
 function back() {
     openTab("search");
 }
+
+// END client side functions
 
 
 function bindFunctionsWelcome() {

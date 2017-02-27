@@ -28,6 +28,18 @@ connected_users = dict()# dict (email and socket)
 
 # START route declarations
 
+@app.route("/lib/jquery/jquery-3.1.1.min.js")
+def libJqueryjs():
+    return app.send_static_file("lib/jquery/jquery-3.1.1.min.js")
+
+@app.route("/lib/bootstrap-3.3.7/css/bootstrap.min.css")
+def libBootstrapcss():
+    return app.send_static_file("lib/bootstrap-3.3.7/css/bootstrap.min.css")
+
+@app.route("/lib/bootstrap-3.3.7/js/bootstrap.min.js")
+def libBootstrapjs():
+    return app.send_static_file("lib/bootstrap-3.3.7/js/bootstrap.min.js")
+
 @app.route("/lib/c3-0.4.11/c3.min.css")
 def libc3css():
     return app.send_static_file("lib/c3-0.4.11/c3.min.css")

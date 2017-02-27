@@ -17,7 +17,6 @@ displayView = function() {
     document.getElementById("innerDiv").innerHTML = document.getElementById(viewId).innerHTML;
     if (viewId == PROFILE) {
         bindFunctionsProfile();
-        openTab("menu", "home");
         connectToWebSocket();
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
@@ -280,30 +279,10 @@ function signOut() {
     });
 }
 
-function openTab(tabType, tabName) {
+function openTab(tabName) {
 
     var i;
-    var tabId;
-    var menu = document.getElementsByClassName(tabType);
-    var tabLinks = document.getElementsByClassName("tabLink");
-
-    if (tabType == "menu") {
-        if (tabName == "home") {
-            tabId = "navHome";
-        }
-        if (tabName == "browse") {
-            tabId = "navBrowse";
-        }
-        if (tabName == "account") {
-            tabId = "navAccount";
-        }
-
-        for (i = 0; i < menu.length; i++) {
-            tabLinks[i].className = tabLinks[i].className.replace(" active", "");
-        }
-
-        document.getElementById(tabId).className += " active";
-    }
+    var menu = document.getElementsByClassName("browsetab");
 
 
     for (i = 0; i < menu.length; i++) {
@@ -313,10 +292,9 @@ function openTab(tabType, tabName) {
     document.getElementById(tabName).style.display = "block";
 
 
-    if (tabName == "home") {
+    /*if (tabName == "home") {
         renderCurrentUserPage();
-    }
-
+    }*/
 }
 
 
@@ -483,7 +461,7 @@ function searchUser() {
       } else {
           userData = server_msg.data;
           renderOtherUserPage(userData);
-          openTab("browsetab", "user");
+          openTab("user");
       }
     });
     return false;
@@ -511,7 +489,7 @@ function renderOtherUserPage(userData) {
 
 
 function back() {
-    openTab("browsetab", "search");
+    openTab("search");
 }
 
 
@@ -525,16 +503,6 @@ function bindFunctionsWelcome() {
 
 
 function bindFunctionsProfile() {
-
-    document.getElementById("navHome").onclick = function() {
-        openTab("menu", "home");
-    };
-    document.getElementById("navBrowse").onclick = function() {
-        openTab("menu", "browse");
-    };
-    document.getElementById("navAccount").onclick = function() {
-        openTab("menu", "account");
-    };
 
     document.getElementById("userMsgReloadButton").onclick = reloadUserMessages;
     document.getElementById("logout").onclick = signOut;

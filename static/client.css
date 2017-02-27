@@ -132,11 +132,6 @@ ul.navbar li a:focus, {
     border-top: none;
 }
 
-.active{
-  background-color: #ddd;
-}
-
-
 .userData{
   background-color: #73F;
   margin-top: 10px;

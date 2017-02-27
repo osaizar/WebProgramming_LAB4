@@ -1,16 +1,17 @@
-Providing live data presentation (3 points) Oier
+Providing live data presentation (3 points) Oier > falta donut y mostrarlo
 
-Drag and Drop (1 point) Isma
+Drag and Drop (1 point) Isma > hecho  ?
 
-Client Side Routing(1 point) Isma
+Client Side Routing(1 point) Isma > X
 
-Third-party Aurth (1 point) Isma
+Third-party Aurth (1 point) Isma  > X
 
-Further Security measures (2 points) Oier
+Further Security measures (2 points) Oier > falta asegurar token
 
-Testing Using Selenium (2 points) Isma
+Testing Using Selenium (2 points) Isma > en proceso
 
-Bootstrap (2 points) Entre los dos
+Bootstrap (2 points) Entre los dos > en proceso
 
+Comentar y ordenar codigo
 
 12 puntos en total, objetivo -> 9

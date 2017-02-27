@@ -1,5 +1,6 @@
 // TODO: Cambiar nombres de las funciones de diagramas
 // TODO: Dividir en archivos distintos
+// TODO: Despues de crear cuenta, borrar campos
 
 //Costant declarations
 const WELCOME = "welcomeview";
@@ -193,8 +194,8 @@ function generateCommentDiagram(){
 
 function signIn() {
 
-    var email = document.forms["loginForm"]["email"].value;
-    var password = document.forms["loginForm"]["password"].value;
+    var email = document.forms["loginForm"]["lemail"].value;
+    var password = document.forms["loginForm"]["lpassword"].value;
 
     var data = {"email":email, "password":password};
     sendHTTPRequest(data, "/sign_in", "POST", function(server_msg){
@@ -243,8 +244,8 @@ function signUp() {
     var gender = gender_select.options[gender_select.selectedIndex].text;
     var city = document.forms["signupForm"]["city"].value;
     var country = document.forms["signupForm"]["country"].value;
-    var email = document.forms["signupForm"]["email"].value;
-    var password = document.forms["signupForm"]["password"].value;
+    var email = document.forms["signupForm"]["semail"].value;
+    var password = document.forms["signupForm"]["spassword"].value;
 
     var user = {
         "email": email,

@@ -90,6 +90,11 @@ ul.navbar li a:focus, {
   margin-top: 100px;
 }
 
+.scroll-y{
+  height: 80vh;
+  overflow-y: scroll;
+}
+
 .rightSide{
   display: inline-block;
   float: right;

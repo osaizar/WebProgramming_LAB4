@@ -1,16 +1,12 @@
-Providing live data presentation (3 points) Oier > falta donut y mostrarlo
+Providing live data presentation (3 points) Oier > hecho -> faltan caracteres de escape
 
-Drag and Drop (1 point) Isma > hecho  ?
-
-Client Side Routing(1 point) Isma > X
-
-Third-party Aurth (1 point) Isma  > X
+Drag and Drop (1 point) Isma > hecho
 
 Further Security measures (2 points) Oier > falta asegurar token
 
-Testing Using Selenium (2 points) Isma > en proceso
+Testing Using Selenium (2 points) Isma > hecho
 
-Bootstrap (2 points) Entre los dos > en proceso
+Bootstrap (2 points) Entre los dos > en proceso -> falta pantalla de login y errores
 
 Comentar y ordenar codigo
 

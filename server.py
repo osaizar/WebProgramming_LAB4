@@ -64,6 +64,10 @@ def clientcss():
 def wimage():
     return app.send_static_file("wimage.png")
 
+@app.route("/dragImage.png")
+def dragImage():
+    return app.send_static_file("dragimage.png")
+
 @app.route('/')
 def index():
     return render_template('client.html')

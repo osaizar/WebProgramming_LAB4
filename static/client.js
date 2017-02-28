@@ -437,7 +437,15 @@ function reloadUserMessages() {
 
       for (var i = 0; i < messages.length; i++) {
           var p = document.createElement('p');
-          p.innerHTML = "<b>" + messages[i].content + "</b> by " + messages[i].writer;
+          var b = document.createElement('b');
+          var span = document.createElement('span');
+          b.setAttribute("draggable","true");
+          b.setAttribute("ondragstart","drag(event)");
+          b.innerHTML = messages[i].content;
+          span.innerHTML = " by " + messages[i].writer;
+          p.appendChild(b);
+          p.appendChild(span);
+
           msgDiv.appendChild(p);
       }
 
@@ -467,7 +475,15 @@ function reloadMessages() {
 
       for (var i = 0; i < messages.length; i++) {
           var p = document.createElement('p');
-          p.innerHTML = "<b>" + messages[i].content + "</b> by " + messages[i].writer;
+          var b = document.createElement('b');
+          var span = document.createElement('span');
+          b.setAttribute("draggable","true");
+          b.setAttribute("ondragstart","drag(event)");
+          b.innerHTML = messages[i].content;
+          span.innerHTML = " by " + messages[i].writer;
+          p.appendChild(b);
+          p.appendChild(span);
+
           msgDiv.appendChild(p);
       }
     });
@@ -513,6 +529,26 @@ function renderOtherUserPage(userData) {
 
 function back() {
     openTab("search");
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    var img = document.createElement("img");
+    img.src = "dragImage.png";
+    img.style.height = "10px";
+    ev.dataTransfer.setDragImage(img, 0, 0);
+    ev.dataTransfer.setData("text", ev.target.innerHTML);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    var p = document.createElement('p');
+    p.innerHTML = data;
+    ev.target.appendChild(p);
 }
 
 // END client side functions

@@ -241,12 +241,15 @@ def change_password():
         return response
     try:
         userId = db.get_userId_by_token(data["token"])
+        user = user = db.get_user_by_id(userId)
         if userId == None:
             return ReturnedData(False, "The token is not correct").createJSON()
-        elif db.get_user_by_id(userId).password != data["old_password"]:
+        elif user.password != crypto.get_hash(data["old_password"], user.salt):
             return ReturnedData(False, "The password is not correct").createJSON()
         else:
-            db.change_user_password(userId, data["new_password"])
+            salt = crypto.create_salt()
+            enc_password = crypto.get_hash(data["new_password"], salt)
+            db.change_user_password(userId, enc_password, salt)
             return ReturnedData(True, "Password changed").createJSON()
     except:
         abort(500)

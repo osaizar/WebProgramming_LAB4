@@ -80,9 +80,9 @@ def get_userId_by_token(token):
     return userId
 
 
-def change_user_password(userId, password):
-    cur = run_query("UPDATE User SET password = '%s' WHERE id = %s" %
-                    (password, userId))
+def change_user_password(userId, password, salt):
+    cur = run_query("UPDATE User SET password = '%s', salt = '%s' WHERE id = %s" %
+                    (password, salt, userId))
 
     if cur.rowcount == 1:
         return True

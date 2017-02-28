@@ -98,16 +98,16 @@
       <div class="tab-content">
           <div id="home" class="tab-pane active">
               <div class="col-md-4">
-                <div id="userData" class="userData">
+                <div id="userData">
                     <h3>User Information:</h3>
-                    <ul class="dataList">
-                        <li>Name: <span id="nameField"></span></li>
-                        <li>Family Name: <span id="fNameField"></span></li>
-                        <li>Country: <span id="countryField"></span></li>
-                        <li>City: <span id="cityField"></span></li>
-                        <li>Gender: <span id="genderField"></span></li>
-                        <li>Email: <span id="emailField"></span></li>
-                    </ul>
+                    <div class="dataList">
+                      <p>Name: <span id="nameField"></span></p>
+                      <p>Family Name: <span id="fNameField"></span></p>
+                      <p>Country: <span id="countryField"></span></p>
+                      <p>City: <span id="cityField"></span></p>
+                      <p>Gender: <span id="genderField"></span></p>
+                      <p>Email: <span id="emailField"></span></p>
+                    </div>
                 </div>
                 <form id="msgForm">
                   <div class="form-group">
@@ -117,7 +117,7 @@
                   <input class="btn btn-default" type="submit" value="Send message">
                 </form>
                 <div>
-                  <h3>Current users</h3>
+                  <h3>Current users:</h3>
                   <div id="diagram0"></div>
                 </div>
                 <div>
@@ -125,12 +125,11 @@
                   <div id="diagram1"></div>
                 </div>
                 <div>
-                  <h3>Comments</h3>
+                  <h3>Comments on your board:</h3>
                   <div id="diagram2"></div>
                 </div>
               </div>
               <div class="col-md-8">
-                <input id="userMsgReloadButton" class="button" type="submit" value="Reload Messages">
                 <div class="scroll-y" id="userMessageDiv"></div>
                 <!-- cada tweet un jumbotron  -->
               </div>

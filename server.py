@@ -142,7 +142,7 @@ def get_conn_user_history():
         ws.send(ReturnedData(False, "You are not loged in!").createJSON())
         return ""
 
-    conn = db.get_today_connections()
+    conn = db.get_today_logs()
     conn = json.dumps(conn)
     ws.send(ReturnedData(True, "Got Data", conn).createJSON())
     return ""
@@ -181,7 +181,7 @@ def sign_in():
                 jToken["token"] = token
                 jToken = json.dumps(jToken)
 
-                db.insert_connection(userId)
+                db.insert_log(userId)
 
                 return ReturnedData(True, "User signed in", jToken).createJSON()
     except:

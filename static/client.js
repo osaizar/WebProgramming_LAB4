@@ -20,6 +20,9 @@ displayView = function() {
         connectToWebSocket();
         renderCurrentUserPage();
         renderDiagrams();
+        window.setInterval(function(){
+          renderDiagrams();
+        }, 5000);
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
     }
@@ -108,7 +111,8 @@ function connectToWebSocket(){
 function renderDiagrams() {
   renderConnectedUserDiagram();
   renderUserHistoryDiagram();
-  generateCommentDiagram();
+  reloadUserMessages();
+  // message diagram gets loaded with the messagess
 }
 
 function renderConnectedUserDiagram(){
@@ -132,7 +136,7 @@ function renderConnectedUserDiagram(){
         type:'donut'
       },
       donut: {
-        expand: false
+        title: "Total Users: "+server_msg.data.totalUsers
       }
     });
   });
@@ -178,43 +182,31 @@ function renderUserHistoryDiagram(){
     });
 }
 
+function renderCommentDiagram(messages){
+  var jdata = {};
+  var fields = [];
 
-function generateCommentDiagram(){
-  var token = localStorage.getItem("token");
-  sendHTTPRequest({"token":token}, "/get_user_messages_by_token", "POST", function(server_msg) {
-    var messages;
-    var jdata = {};
-    var fields = [];
-
-    if (server_msg.success) {
-        messages = server_msg.data;
-    } else {
-        return -1; //error
+  for (var i = 0; i < messages.length; i++) {
+    var writer = messages[i].writer;
+    if (fields.indexOf(writer) == -1){
+      fields.push(writer);
+      jdata[writer] = 1;
+    }else{
+      jdata[writer] = jdata[writer]+1;
     }
+  }
 
-    for (var i = 0; i < messages.length; i++) {
-      var writer = messages[i].writer;
-      if (fields.indexOf(writer) == -1){
-        fields.push(writer);
-        jdata[writer] = 1;
-      }else{
-        jdata[writer] = jdata[writer]+1;
-      }
-    }
+  console.log(jdata);
 
-
-    alert(JSON.stringify(jdata));
-
-    var diagram1 = c3.generate({
-      bindto: '#diagram2',
-      data: {
-          json: [ jdata ],
-          keys: {
-            value: fields,
-          },
-          type:'pie'
+  var diagram1 = c3.generate({
+    bindto: '#diagram2',
+    data: {
+        json: [ jdata ],
+        keys: {
+          value: fields,
         },
-    });
+        type:'pie'
+      },
   });
 }
 
@@ -380,7 +372,7 @@ function renderCurrentUserPage() {
       document.getElementById("cityField").innerHTML = userData.city;
       document.getElementById("emailField").innerHTML = userData.email;
 
-      reloadUserMessages();
+      //reloadUserMessages();
     });
 }
 
@@ -448,6 +440,8 @@ function reloadUserMessages() {
           p.innerHTML = "<b>" + messages[i].content + "</b> by " + messages[i].writer;
           msgDiv.appendChild(p);
       }
+
+      renderCommentDiagram(messages);
     });
 }
 
@@ -535,7 +529,6 @@ function bindFunctionsWelcome() {
 
 function bindFunctionsProfile() {
 
-    document.getElementById("userMsgReloadButton").onclick = reloadUserMessages;
     document.getElementById("logout").onclick = signOut;
     document.getElementById("back").onclick = back;
     document.getElementById("msgReloadButton").onclick = reloadMessages;

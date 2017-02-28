@@ -81,8 +81,8 @@ def get_userId_by_token(token):
 
 
 def change_user_password(userId, password, salt):
-    cur = run_query("UPDATE User SET password = '%s', salt = '%s' WHERE id = %s" %
-                    (password, salt, userId))
+    cur = run_query("UPDATE User SET password = '%s', salt = '%s' \
+                    WHERE id = %s" % (password, salt, userId))
 
     if cur.rowcount == 1:
         return True
@@ -96,16 +96,16 @@ def get_user_number():
     return result["count"]
 
 
-def insert_token(token, userId):
-    cur = run_query("INSERT INTO Session (token, userId)\
-                    VALUES('%s',%s)" % (token, userId))
+def create_session(token, userId, key):
+    cur = run_query("INSERT INTO Session (token, userId, key)\
+                    VALUES('%s', %s,'%s')" % (token, userId, key))
     if cur.rowcount == 1:
         return True
     else:
         return False
 
 
-def get_token(userId):
+def get_session_token(userId):
     cur = run_query("SELECT * FROM Session WHERE userId = %s" % userId)
     result = cur.fetchone()
     if result:
@@ -116,20 +116,26 @@ def get_token(userId):
     return token
 
 
-def delete_token(token):
+def get_session_key(token):
+    cur = run_query("SELECT * FROM Session WHERE token = '%s'" % token)
+    result = cur.fetchone()
+    if result:
+        key = result["key"]
+    else:
+        key = None
+
+    return key
+
+
+def delete_session(token):
     cur = run_query("DELETE FROM Session WHERE token = '%s'" % token)
     if cur.rowcount == 1:
         return True
     else:
         return False
 
-def get_session_number():
-        cur = run_query("SELECT COUNT(*) as 'count' FROM Session")
-        result = cur.fetchone()
 
-        return result["count"]
-
-def delete_token_by_email(email):
+def delete_session_by_email(email):
     cur = run_query("DELETE FROM Session WHERE userId = (SELECT id \
                                                          FROM User \
                                                          WHERE email = '%s')" % email)
@@ -137,6 +143,13 @@ def delete_token_by_email(email):
         return True
     else:
         return False
+
+
+def get_session_number():
+        cur = run_query("SELECT COUNT(*) as 'count' FROM Session")
+        result = cur.fetchone()
+
+        return result["count"]
 
 
 def insert_message(message):

@@ -80,9 +80,11 @@ def index():
 def connect():
     if request.environ.get("wsgi.websocket"):
         ws = request.environ['wsgi.websocket']
-        data = ws.receive()
+        jdata = ws.receive()
+        data = json.loads(jdata)["data"]
         data = json.loads(data)
-        valid, response = checker.check_token(data)
+        hmac = json.loads(jdata)["hmac"]
+        valid, response = checker.check_token_and_HMAC(data, hmac)
         if not valid:
             ws.send(response)
             return ""
@@ -111,9 +113,11 @@ def connect():
 @app.route("/get_current_conn_users")
 def get_current_conn_users():
     ws = request.environ['wsgi.websocket']
-    data = ws.receive()
+    jdata = ws.receive()
+    data = json.loads(jdata)["data"]
     data = json.loads(data)
-    valid, response = checker.check_token(data)
+    hmac = json.loads(jdata)["hmac"]
+    valid, response = checker.check_token_and_HMAC(data, hmac)
     if not valid:
         ws.send(response)
         return ""
@@ -135,9 +139,11 @@ def get_current_conn_users():
 @app.route("/get_conn_user_history")
 def get_conn_user_history():
     ws = request.environ['wsgi.websocket']
-    data = ws.receive()
+    jdata = ws.receive()
+    data = json.loads(jdata)["data"]
     data = json.loads(data)
-    valid, response = checker.check_token(data)
+    hmac = json.loads(jdata)["hmac"]
+    valid, response = checker.check_token_and_HMAC(data, hmac)
     if not valid:
         ws.send(response)
         return ""
@@ -159,7 +165,8 @@ def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
 
 @app.route("/sign_in", methods=["POST"])
 def sign_in():
-    data = request.get_json(silent = True) # get data
+    data = request.get_json(silent = True)["data"] # get data
+    data = json.loads(data)
     valid, response = checker.check_sign_in_data(data)
     if not valid:
         return response
@@ -175,17 +182,21 @@ def sign_in():
                 if data["email"] in connected_users:
                     s = connected_users[data["email"]]
                     s.send(ReturnedData(False, "close:session").createJSON())
-                    db.delete_token_by_email(data["email"])
+                    db.delete_session_by_email(data["email"])
                     del connected_users[data["email"]]
 
                 token = token_generator()
+                key = token_generator()
 
-                db.insert_token(token, userId)
                 jToken = {}
                 jToken["token"] = token
+                jToken["key"] = key
                 jToken = json.dumps(jToken)
 
-                db.insert_log(userId)
+                if not db.create_session(token, userId, key):
+                    abort(500)
+                if not db.insert_log(userId):
+                    abort(500)
 
                 return ReturnedData(True, "User signed in", jToken).createJSON()
     except:
@@ -193,7 +204,8 @@ def sign_in():
 
 @app.route("/sign_up", methods=["POST"])
 def sign_up():
-    data = request.get_json(silent = True) # get data
+    data = request.get_json(silent = True)["data"] # get data
+    data = json.loads(data)
     valid, response = checker.check_sign_up_data(data)
     if not valid:
         return response
@@ -212,8 +224,10 @@ def sign_up():
 
 @app.route("/sign_out", methods=["POST"])
 def sign_out():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_token(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -221,7 +235,7 @@ def sign_out():
         if userId != None:
             email = db.get_user_by_id(userId).email
             if email != None:
-                if db.delete_token(data["token"]):
+                if db.delete_session(data["token"]):
                     del connected_users[email]
                 return ReturnedData(True, "Signed out").createJSON()
             else:
@@ -235,8 +249,10 @@ def sign_out():
 
 @app.route("/change_password", methods=["POST"])
 def change_password():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_change_password_data(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_change_password_data(data, hmac)
     if not valid:
         return response
     try:
@@ -256,8 +272,10 @@ def change_password():
 
 @app.route("/get_user_data_by_token", methods=["POST"])
 def get_user_data_by_token():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_token(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -273,8 +291,10 @@ def get_user_data_by_token():
 
 @app.route("/get_user_data_by_email", methods=["POST"]) #TODO: Name changed, remember to change it on lab3
 def get_user_data_by_email():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_token_and_email(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_email_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -293,8 +313,10 @@ def get_user_data_by_email():
 
 @app.route("/get_user_messages_by_token", methods=["POST"])
 def get_user_messages_by_token():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_token(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -311,8 +333,10 @@ def get_user_messages_by_token():
 
 @app.route("/get_user_messages_by_email", methods=["POST"])
 def get_user_messages_by_email():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_token_and_email(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_email_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -330,8 +354,10 @@ def get_user_messages_by_email():
 
 @app.route("/send_message", methods=["POST"])
 def send_message():
-    data = request.get_json(silent = True)
-    valid, response = checker.check_send_message_data(data)
+    data = request.get_json(silent = True)["data"]
+    data = json.loads(data)
+    hmac = request.get_json(silent = True)["hmac"]
+    valid, response = checker.check_token_email_and_HMAC(data, hmac)
     if not valid:
         return response
     try:
@@ -356,6 +382,6 @@ def send_message():
         abort(500)
 
 if __name__ == "__main__":
-    print "Starting server at "+LADDR+":"+str(LPORT)
+    print "Starting test server at "+LADDR+":"+str(LPORT)
     http_server = pywsgi.WSGIServer((LADDR, LPORT), app, handler_class=WebSocketHandler)
     http_server.serve_forever()

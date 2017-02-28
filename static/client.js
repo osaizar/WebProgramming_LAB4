@@ -25,6 +25,7 @@ displayView = function() {
         }, 5000);
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
+        window.setInterval();
     }
 };
 
@@ -33,16 +34,23 @@ window.onload = function() {
     displayView();
 };
 
+function getHMAC(data){
+  return "hmac";
+}
 
 // START request handlers
 
 function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     var response = "";
+    var request = {};
+
+    request["data"] = JSON.stringify(data);
+    request["hmac"] = getHMAC(JSON.stringify(data));
 
     xmlhttp.open(method, url);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    xmlhttp.send(JSON.stringify(data));
+    xmlhttp.send(JSON.stringify(request));
 
     xmlhttp.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200){
@@ -56,7 +64,12 @@ function sendHTTPRequest(data, url, method, onResponse){
 function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
-      socket.send(JSON.stringify(data));
+      var jdata = {}
+
+      jdata["data"] = JSON.stringify(data);
+      jdata["hmac"] = getHMAC(JSON.stringify(data));
+
+      socket.send(JSON.stringify(jdata));
       socket.onmessage = function(s){
         response = JSON.parse(s.data);
         if (!response.success){
@@ -226,6 +239,7 @@ function signIn() {
           showSignUpError(server_msg.message);
       } else {
           localStorage.setItem("token", server_msg.data.token);
+          localStorage.setItem("key", server_msg.data.key);
           displayView();
       }
     });
@@ -300,6 +314,7 @@ function signOut() {
         showChangePasswordError(server_msg.message);
       }
       localStorage.setItem("token", "undefined"); // TODO: Mirad esto plis
+      localStorage.setItem("key", "undefined");
       displayView();
     });
 }

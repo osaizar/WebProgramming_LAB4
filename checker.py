@@ -2,6 +2,7 @@
 
 from flask import Flask, request, render_template, abort
 import database_helper as db
+import crypto
 import string
 import random
 import json
@@ -21,6 +22,7 @@ def check_sign_in_data(data):
             return False, ReturnedData(False, "Fill all fields").createJSON()
     except:
         abort(400)
+
     return True, None
 
 
@@ -49,11 +51,13 @@ def check_sign_up_data(data):
     else:
         return True, None
 
-def check_change_password_data(data):
-    if data == None:
-        abort(400)
+
+def check_change_password_data(data, hmac):
+    valid, response = check_HMAC(data, hmac)
+    if not valid:
+        return valid, response
     try:
-        if not (data["token"] and data["old_password"] and data["new_password"]):
+        if not (data["old_password"] and data["new_password"]):
             abort(400)
     except:
         abort(400)
@@ -62,6 +66,23 @@ def check_change_password_data(data):
         return False, ReturnedData(False, "The password is too short").createJSON()
     else:
         return True, None
+
+
+def check_send_message_data(data, hmac):
+    valid, response = check_HMAC(data, hmac)
+    if not valid:
+        return valid, response
+    try:
+        if not (data["msg"] and data["reader"]):
+            abort(400)
+    except:
+        abort(400)
+
+    if data["msg"].isspace():
+        return False, ReturnedData(False, "The message is too short").createJSON()
+    else:
+        return True, None
+
 
 def check_token(data):
     if data == None:
@@ -74,29 +95,41 @@ def check_token(data):
 
     return True, None
 
-def check_token_and_email(data):
-    if data == None:
+
+def check_HMAC(data, hmac):
+    valid, response = check_token(data)
+    if not valid:
+        return valid, response
+
+    if hmac == None:
         abort(400)
+
+    key = db.get_session_key(data["token"])
+    jdata = json.dumps(data)
+
+    if crypto.get_hmac(jdata, key) != hmac:
+        return False, ReturnedData(False, "HMAC is not correct").createJSON()
+
+    return True, None
+
+
+def check_token_and_HMAC(data, hmac):
+    valid, response = check_HMAC(data, hmac)
+    if not valid:
+        return valid, response
+    else:
+        return True, None
+
+
+def check_token_email_and_HMAC(data, hmac):
+    valid, response = check_HMAC(data, hmac)
+    if not valid:
+        return valid, response
+
     try:
-        if not (data["token"] and data["email"]):
+        if not data["email"]:
             abort(400)
     except:
         abort(400)
 
     return True, None
-
-
-
-def check_send_message_data(data):
-    if data == None:
-        abort(400)
-    try:
-        if not (data["token"] and data["msg"] and data["reader"]):
-            abort(400)
-    except:
-        abort(400)
-
-    if data["msg"].isspace():
-        return False, ReturnedData(False, "The message is too short").createJSON()
-    else:
-        return True, None

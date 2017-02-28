@@ -97,7 +97,7 @@
 
       <div class="tab-content">
           <div id="home" class="tab-pane active">
-              <div class="col-md-4">
+              <div class="col-md-offset-1 col-md-5">
                 <div id="userData">
                     <h3>User Information:</h3>
                     <div class="dataList">
@@ -116,20 +116,9 @@
                   </div>
                   <input class="btn btn-default" type="submit" value="Send message">
                 </form>
-                <div>
-                  <h3>Current users:</h3>
-                  <div id="diagram0"></div>
-                </div>
-                <div>
-                  <h3>Connection history</h3>
-                  <div id="diagram1"></div>
-                </div>
-                <div>
-                  <h3>Comments on your board:</h3>
-                  <div id="diagram2"></div>
-                </div>
               </div>
-              <div class="col-md-8">
+              <div class="col-md-5">
+                <h3> Messages: </h3>
                 <div class="scroll-y" id="userMessageDiv"></div>
                 <!-- cada tweet un jumbotron  -->
               </div>
@@ -190,28 +179,44 @@
 
       <div id="account" class="tab-pane">
         <div class="container">
-          <div class="col-md-4 col-md-offset-4 col-xs-12">
-            <h3>Change password</h3>
-            <form id="changePassForm">
-                <div class="form-group">
-                  <label for="current_password">Current PSW</label>
-                  <input type="password" class="form-control" name="current_password" required>
-                </div>
-                <div class="form-group">
-                  <label for="new_password">New PSW</label>
-                  <input type="password" class="form-control" name="new_password" required pattern=".{6,}" title="6 characters minimum" onchange="checkPasswords()">
-                </div>
-                <div class="form-group">
-                  <label for="rnew_password">Repeat new PSW</label>
-                  <input id="s_rpassword" type="password" class="form-control" name="rnew_password" required>
-                </div>
-                <input class="btn btn-default" type="submit" value="Change Password">
-            </form>
-            <div id = "chPasswordError" class = "errorField" style = "display:none">
-              <span id = "messageChPassword"> <span>
+          <div class="row">
+            <div class="col-md-4 col-md-offset-4 col-xs-12">
+              <h3>Change password</h3>
+              <form id="changePassForm">
+                  <div class="form-group">
+                    <label for="current_password">Current PSW</label>
+                    <input type="password" class="form-control" name="current_password" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="new_password">New PSW</label>
+                    <input type="password" class="form-control" name="new_password" required pattern=".{6,}" title="6 characters minimum" onchange="checkPasswords()">
+                  </div>
+                  <div class="form-group">
+                    <label for="rnew_password">Repeat new PSW</label>
+                    <input id="s_rpassword" type="password" class="form-control" name="rnew_password" required>
+                  </div>
+                  <input class="btn btn-default" type="submit" value="Change Password">
+              </form>
+              <div id = "chPasswordError" class = "errorField" style = "display:none">
+                <span id = "messageChPassword"> <span>
+              </div>
+              <div id = "chPasswordSuccess" class = "successField" style = "display:none">
+                <span id = "messageChPasswordS"> <span>
+              </div>
             </div>
-            <div id = "chPasswordSuccess" class = "successField" style = "display:none">
-              <span id = "messageChPasswordS"> <span>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <h3>Current users:</h3>
+              <div id="diagram0"></div>
+            </div>
+            <div class="col-md-4">
+              <h3>Connection history</h3>
+              <div id="diagram1"></div>
+            </div>
+            <div class="col-md-4">
+              <h3>Comments on your board:</h3>
+              <div id="diagram2"></div>
             </div>
           </div>
         </div>

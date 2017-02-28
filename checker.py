@@ -105,9 +105,8 @@ def check_HMAC(data, hmac):
         abort(400)
 
     key = db.get_session_key(data["token"])
-    jdata = json.dumps(data)
-
-    if crypto.get_hmac(jdata, key) != hmac:
+    
+    if crypto.get_hmac(data["token"], key) != hmac:
         return False, ReturnedData(False, "HMAC is not correct").createJSON()
 
     return True, None
@@ -125,11 +124,9 @@ def check_token_email_and_HMAC(data, hmac):
     valid, response = check_HMAC(data, hmac)
     if not valid:
         return valid, response
-
     try:
         if not data["email"]:
             abort(400)
     except:
         abort(400)
-
     return True, None

@@ -27,6 +27,17 @@ LADDR = "127.0.0.1"
 connected_users = dict()# dict (email and socket)
 
 # START route declarations
+@app.route("/lib/cryptoJS-3.1.2/rollups/hmac-sha256.js")
+def libcryptojshmacsha256():
+    return app.send_static_file("lib/cryptoJS-3.1.2/rollups/hmac-sha256.js")
+
+@app.route("/lib/cryptoJS-3.1.2/components/core-min.js")
+def libcryptojscore():
+    return app.send_static_file("lib/cryptoJS-3.1.2/components/core-min.js")
+
+@app.route("/lib/cryptoJS-3.1.2/components/hmac.js")
+def libcryptojshmac():
+    return app.send_static_file("lib/cryptoJS-3.1.2/components/hmac.js")
 
 @app.route("/lib/jquery/jquery-3.1.1.min.js")
 def libJqueryjs():
@@ -78,7 +89,44 @@ def index():
 # START WS functions
 @app.route("/connect")
 def connect():
-    if request.environ.get("wsgi.websocket"):
+    try:
+        if request.environ.get("wsgi.websocket"):
+            ws = request.environ['wsgi.websocket']
+            jdata = ws.receive()
+            data = json.loads(jdata)["data"]
+            data = json.loads(data)
+            hmac = json.loads(jdata)["hmac"]
+            valid, response = checker.check_token_and_HMAC(data, hmac)
+            if not valid:
+                ws.send(response)
+                return ""
+            userId = db.get_userId_by_token(data["token"])
+            if userId == None:
+                ws.send(ReturnedData(False, "You are not loged in!").createJSON())
+                return ""
+
+            email = db.get_user_by_id(userId).email
+            connected_users[email] = ws
+
+            while True: # keep socket open
+                try:
+                    obj = ws.receive()
+                    if obj == None:
+                        del connected_users[email]
+                        ws.close()
+                except:
+                    break
+            return ''
+        else:
+            ws.send(ReturnedData(False, "Bad request!").createJSON())
+
+        return ""
+    except:
+        abort(500)
+
+@app.route("/get_current_conn_users")
+def get_current_conn_users():
+    try:
         ws = request.environ['wsgi.websocket']
         jdata = ws.receive()
         data = json.loads(jdata)["data"]
@@ -93,69 +141,41 @@ def connect():
             ws.send(ReturnedData(False, "You are not loged in!").createJSON())
             return ""
 
-        email = db.get_user_by_id(userId).email
-        connected_users[email] = ws
-
-        while True: # keep socket open
-            try:
-                obj = ws.receive()
-                if obj == None:
-                    del connected_users[email]
-                    ws.close()
-            except:
-                break
-        return ''
-    else:
-        ws.send(ReturnedData(False, "Bad request!").createJSON())
-
-    return ""
-
-@app.route("/get_current_conn_users")
-def get_current_conn_users():
-    ws = request.environ['wsgi.websocket']
-    jdata = ws.receive()
-    data = json.loads(jdata)["data"]
-    data = json.loads(data)
-    hmac = json.loads(jdata)["hmac"]
-    valid, response = checker.check_token_and_HMAC(data, hmac)
-    if not valid:
-        ws.send(response)
+        total_users = db.get_user_number()
+        conn_users = db.get_session_number()
+        rt = {}
+        rt["totalUsers"] = total_users
+        rt["connectedUsers"] = conn_users
+        rt = json.dumps(rt)
+        ws.send(ReturnedData(True, "Got Data", rt).createJSON())
         return ""
-    userId = db.get_userId_by_token(data["token"])
-    if userId == None:
-        ws.send(ReturnedData(False, "You are not loged in!").createJSON())
-        return ""
-
-    total_users = db.get_user_number()
-    conn_users = db.get_session_number()
-    rt = {}
-    rt["totalUsers"] = total_users
-    rt["connectedUsers"] = conn_users
-    rt = json.dumps(rt)
-    ws.send(ReturnedData(True, "Got Data", rt).createJSON())
-    return ""
+    except:
+        abort(500)
 
 
 @app.route("/get_conn_user_history")
 def get_conn_user_history():
-    ws = request.environ['wsgi.websocket']
-    jdata = ws.receive()
-    data = json.loads(jdata)["data"]
-    data = json.loads(data)
-    hmac = json.loads(jdata)["hmac"]
-    valid, response = checker.check_token_and_HMAC(data, hmac)
-    if not valid:
-        ws.send(response)
-        return ""
-    userId = db.get_userId_by_token(data["token"])
-    if userId == None:
-        ws.send(ReturnedData(False, "You are not loged in!").createJSON())
-        return ""
+    try:
+        ws = request.environ['wsgi.websocket']
+        jdata = ws.receive()
+        data = json.loads(jdata)["data"]
+        data = json.loads(data)
+        hmac = json.loads(jdata)["hmac"]
+        valid, response = checker.check_token_and_HMAC(data, hmac)
+        if not valid:
+            ws.send(response)
+            return ""
+        userId = db.get_userId_by_token(data["token"])
+        if userId == None:
+            ws.send(ReturnedData(False, "You are not loged in!").createJSON())
+            return ""
 
-    conn = db.get_today_logs()
-    conn = json.dumps(conn)
-    ws.send(ReturnedData(True, "Got Data", conn).createJSON())
-    return ""
+        conn = db.get_today_logs()
+        conn = json.dumps(conn)
+        ws.send(ReturnedData(True, "Got Data", conn).createJSON())
+        return ""
+    except:
+        abort(500)
 
 
 # END WS functions
@@ -357,7 +377,7 @@ def send_message():
     data = request.get_json(silent = True)["data"]
     data = json.loads(data)
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_email_and_HMAC(data, hmac)
+    valid, response = checker.check_send_message_data(data, hmac)
     if not valid:
         return response
     try:

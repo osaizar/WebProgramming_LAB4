@@ -6,6 +6,8 @@
 const WELCOME = "welcomeview";
 const PROFILE = "profileview";
 
+var renderInterval;
+
 
 displayView = function() {
     var viewId;
@@ -20,12 +22,12 @@ displayView = function() {
         connectToWebSocket();
         renderCurrentUserPage();
         renderDiagrams();
-        window.setInterval(function(){
-          renderDiagrams();
+        renderInterval = window.setInterval(function(){
+          //renderDiagrams();
         }, 5000);
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
-        window.setInterval();
+        window.clearInterval(renderInterval);
     }
 };
 
@@ -34,8 +36,14 @@ window.onload = function() {
     displayView();
 };
 
-function getHMAC(data){
-  return "hmac";
+function getHMAC(){
+  var key = localStorage.getItem("key");
+  var token = localStorage.getItem("token");
+  if (key == null){
+    return null;
+  }else{
+    return CryptoJS.HmacSHA256(token, key).toLocaleString();
+  }
 }
 
 // START request handlers
@@ -44,9 +52,14 @@ function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     var response = "";
     var request = {};
+    var hmac_s = getHMAC();
+
+    alert(url);
 
     request["data"] = JSON.stringify(data);
-    request["hmac"] = getHMAC(JSON.stringify(data));
+    if (hmac_s != null){
+      request["hmac"] = hmac_s;
+    }
 
     xmlhttp.open(method, url);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -65,9 +78,12 @@ function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
       var jdata = {}
+      var hmac_s = getHMAC();
 
       jdata["data"] = JSON.stringify(data);
-      jdata["hmac"] = getHMAC(JSON.stringify(data));
+      if (hmac_s != null){
+        jdata["hmac"] = hmac_s;
+      }
 
       socket.send(JSON.stringify(jdata));
       socket.onmessage = function(s){
@@ -407,6 +423,8 @@ function sendMessage() {
       var msg = document.forms["msgForm"]["message"].value;
 
       document.forms["msgForm"]["message"].value = "";
+
+      alert("sending message");
 
       var server_msg = sendHTTPRequest({"token":token, "msg":msg,"reader": data.email}, "/send_message", "POST");
 

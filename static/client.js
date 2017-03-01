@@ -213,26 +213,34 @@ function renderCommentDiagram(messages){
   var jdata = {};
   var fields = [];
 
-  for (var i = 0; i < messages.length; i++) {
-    var writer = messages[i].writer;
-    if (fields.indexOf(writer) == -1){
-      fields.push(writer);
-      jdata[writer] = 1;
-    }else{
-      jdata[writer] = jdata[writer]+1;
+  if (messages != null || messages.length == 0){
+    for (var i = 0; i < messages.length; i++) {
+      var writer = messages[i].writer;
+      if (fields.indexOf(writer) == -1){
+        fields.push(writer);
+        jdata[writer] = 1;
+      }else{
+        jdata[writer] = jdata[writer]+1;
+      }
     }
-  }
 
-  var diagram1 = c3.generate({
-    bindto: '#diagram2',
-    data: {
-        json: [ jdata ],
-        keys: {
-          value: fields,
+    var diagram1 = c3.generate({
+      bindto: '#diagram2',
+      data: {
+          json: [ jdata ],
+          keys: {
+            value: fields,
+          },
+          type:'pie'
         },
-        type:'pie'
-      },
-  });
+    });
+  }
+  var diagram = document.getElementById("diagram2");
+  var h4 = document.createElement("h4");
+  h4.innerHTML = "You have no messages";
+  diagram.innerHTML = "";
+  diagram.appendChild(h4);
+
 }
 
 // END diagrams

@@ -8,66 +8,69 @@
     <link href="lib/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="client.css" type="text/css" rel="stylesheet">
     <script type="text/view" id="welcomeview">
-    <div class="holder">
-        <div class="leftSide">
+
+    <div class="row col-md-offset-0">
             <img src="wimage.png" />
         </div>
 
-        <div class="rightSide">
+        <div class="row col-md-4 col-xs-12 col-sm-12">
             <form id="loginForm">
-                <div class="form-row">
+                <h2 id="signupTitle">Log in here</h2>
+                <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="lemail" name="lemail" required>
+                    <input class="form-control" type="lemail" name="lemail" required>
                 </div>
-                <div class="form-row">
+                <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" name="lpassword" required>
+                    <input class="form-control" type="password" name="lpassword" required>
                 </div>
                 <div>
-                    <input id="Login" class="button" type="submit" value="Login">
+                    <input class="btn btn-default" id="Login" class="button" type="submit" value="Login">
                 </div>
             </form>
+          </div>
 
+          <div class="col-md-8 col-xs-8 col-sm-12">
           <form id="signupForm">
               <h2 id="signupTitle">Sign up here</h2>
 
-              <div class="form-row">
+              <div class="col-sm-6 form-group">
                   <label for="name">First name</label>
-                  <input type="text" name="name" required>
+                  <input class="form-control" type="text" name="name" required>
               </div>
-              <div class="form-row">
+              <div class="col-sm-6 form-group">
                   <label for="f-name">Family name</label>
-                  <input type="text" name="f-name" required>
+                  <input class="form-control" type="text" name="f-name" required>
               </div>
-              <div class="form-row">
+              <div class="col-sm-6 form-group">
                   <label for="gender">Gender</label>
                   <select id="gender" form="signupForm">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>
             </div>
-            <div class="form-row">
+            <div class="col-sm-6 form-group">
                   <label for="city">City</label>
-                  <input type="text" name="city" required>
+                  <input class="form-control" type="text" name="city" required>
             </div>
-            <div class="form-row">
+            <div class="col-sm-6 form-group">
                   <label for="country">Country</label>
-                  <input type="text" name="country" required>
+                  <input class="form-control" type="text" name="country" required>
             </div>
-            <div class="form-row">
+            <div class="col-sm-6 form-group">
                   <label for="Email">Email</label>
-                  <input type="semail" name="semail" required>
+                  <input class="form-control" type="semail" name="semail" required>
             </div>
-            <div class="form-row">
+            <div class="col-sm-6 form-group">
                   <label for="password">Password</label>
-                  <input id="s_password" type="password" name="spassword" required pattern=".{6,}" title="6 characters minimum" onchange="checkPasswords()">
+                  <input class="form-control" id="s_password" type="password" name="spassword" required pattern=".{6,}" title="6 characters minimum" onchange="checkPasswords()">
             </div>
-            <div class="form-row">
+            <div class="col-sm-6 form-group">
                   <label for="Rpassword">Repeat PSW</label>
-                  <input id="s_rpassword" type="password" name="Rspassword" required>
+                  <input class="form-control" id="s_rpassword" type="password" name="Rspassword" required>
             </div>
             <div>
-                <br><input class="button" type="submit" value="Sign Up">
+                <br><input class="btn btn-default"class="button" type="submit" value="Sign Up">
             </div>
           </form>
           <div id = "signUpError" class = "alert alert-danger" style = "display:none">

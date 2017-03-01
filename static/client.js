@@ -53,7 +53,6 @@ function sendHTTPRequest(data, url, method, onResponse){
     var request = {};
     var hmac_s = getHMAC(JSON.stringify(data));
 
-    alert(url);
     request["data"] = JSON.stringify(data);
 
     if (hmac_s != null){
@@ -67,7 +66,6 @@ function sendHTTPRequest(data, url, method, onResponse){
     xmlhttp.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200){
         response = xmlhttp.responseText;
-        alert(response);
         onResponse(JSON.parse(response));
       }
     }
@@ -140,7 +138,7 @@ function connectToWebSocket(){
 function renderDiagrams() {
   renderConnectedUserDiagram();
   renderUserHistoryDiagram();
-  reloadUserMessages();
+  reloadMessages();
   // message diagram gets loaded with the messagess
 }
 
@@ -252,6 +250,7 @@ function signIn() {
       if (!server_msg.success) {
           showSignUpError(server_msg.message);
       } else {
+          document.forms["loginForm"].reset();
           localStorage.setItem("token", server_msg.data.token);
           localStorage.setItem("key", server_msg.data.key);
           displayView();
@@ -313,6 +312,7 @@ function signUp() {
       if (!server_msg.success) {
           showSignUpError(server_msg.message);
       }else{
+        document.forms["signupForm"].reset();
         showSignUpSuccess(server_msg.message)
       }
     });
@@ -394,7 +394,7 @@ function renderCurrentUserPage() {
       document.getElementById("cityField").innerHTML = userData.city;
       document.getElementById("emailField").innerHTML = userData.email;
 
-      //reloadUserMessages();
+      //reloadMessages();
     });
 }
 
@@ -415,11 +415,9 @@ function sendMessage() {
 
       document.forms["msgForm"]["message"].value = "";
 
-      alert("sending message");
-
       var server_msg = sendHTTPRequest({"token":token, "msg":msg,"reader": data.email}, "/send_message", "POST");
 
-      reloadUserMessages();
+      reloadMessages();
 
       document.getElementById("msgToMe").value = "";
     });
@@ -430,18 +428,19 @@ function sendMessage() {
 function sendMessageTo() {
 
     var token = localStorage.getItem("token");
-    var email = document.forms["userSearchForm"]["email"].value;
+    var email = document.getElementById("othEmailField").innerHTML;
+    alert(email);
     var msg = document.forms["msgToForm"]["message"].value;
 
-    sendHTTPRequest({"token":token, "msg":msg,"reader": email}, "/send_message", "POST", function(server_msg){
-      reloadMessages();
+    sendHTTPRequest({"token":token, "msg":msg, "reader": email}, "/send_message", "POST", function(server_msg){
+      reloadOtherUserMessages();
       document.getElementById("msgTo").value = "";
     });
     return false;
 }
 
 
-function reloadUserMessages() {
+function reloadMessages() {
 
     var token = localStorage.getItem("token");
     sendHTTPRequest({"token":token}, "/get_user_messages_by_token", "POST", function(server_msg) {
@@ -478,10 +477,10 @@ function reloadUserMessages() {
 }
 
 
-function reloadMessages() {
+function reloadOtherUserMessages() {
 
     var token = localStorage.getItem("token");
-    var email = document.forms["userSearchForm"]["email"].value;
+    var email = document.getElementById("othEmailField").innerHTML;
     sendHTTPRequest({"token":token, "email":email}, "/get_user_messages_by_email", "POST", function(server_msg){
       var messages;
 
@@ -548,7 +547,7 @@ function renderOtherUserPage(userData) {
     document.getElementById("othGenderField").innerHTML = userData.city;
     document.getElementById("othEmailField").innerHTML = userData.email;
 
-    reloadMessages();
+    reloadOtherUserMessages();
 }
 
 

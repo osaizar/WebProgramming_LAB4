@@ -18,6 +18,7 @@ def check_sign_in_data(data):
     if data == None:
         abort(400)
     try:
+        data = json.loads(data)
         if not (data["email"] and data["password"]):
             return False, ReturnedData(False, "Fill all fields").createJSON()
     except:
@@ -30,6 +31,7 @@ def check_sign_up_data(data):
     if data == None:
         abort(400)
     try:
+        data = json.loads(data)
         if not (data["email"] and data["firstname"] and data["familyname"] \
             and data["gender"] and data["password"] and data["city"] and data["country"]):
 
@@ -57,6 +59,7 @@ def check_change_password_data(data, hmac):
     if not valid:
         return valid, response
     try:
+        data = json.loads(data)
         if not (data["old_password"] and data["new_password"]):
             abort(400)
     except:
@@ -73,6 +76,7 @@ def check_send_message_data(data, hmac):
     if not valid:
         return valid, response
     try:
+        data = json.loads(data)
         if not (data["msg"] and data["reader"]):
             abort(400)
     except:
@@ -88,6 +92,7 @@ def check_token(data):
     if data == None:
         abort(400)
     try:
+        data = json.loads(data)
         if not (data["token"]):
             abort(400)
     except:
@@ -100,13 +105,18 @@ def check_HMAC(data, hmac):
     valid, response = check_token(data)
     if not valid:
         return valid, response
-
     if hmac == None:
         abort(400)
 
-    key = db.get_session_key(data["token"])
-    
-    if crypto.get_hmac(data["token"], key) != hmac:
+    jdata = json.loads(data)
+    key = db.get_session_key(jdata["token"])
+    ghmac = crypto.get_hmac(data, key);
+
+    if not ghmac:
+        print "ilegal character"
+        return False, ReturnedData(False, "Ilegal character in message").createJSON()
+
+    if ghmac != hmac:
         return False, ReturnedData(False, "HMAC is not correct").createJSON()
 
     return True, None
@@ -125,6 +135,7 @@ def check_token_email_and_HMAC(data, hmac):
     if not valid:
         return valid, response
     try:
+        data = json.loads(data)
         if not data["email"]:
             abort(400)
     except:

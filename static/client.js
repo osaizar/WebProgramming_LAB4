@@ -36,13 +36,12 @@ window.onload = function() {
     displayView();
 };
 
-function getHMAC(){
+function getHMAC(data){
   var key = localStorage.getItem("key");
-  var token = localStorage.getItem("token");
-  if (key == null){
+  if (key == null || key == "undefined"){
     return null;
   }else{
-    return CryptoJS.HmacSHA256(token, key).toLocaleString();
+    return CryptoJS.HmacSHA256(btoa(data), key).toLocaleString();
   }
 }
 
@@ -52,11 +51,11 @@ function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     var response = "";
     var request = {};
-    var hmac_s = getHMAC();
+    var hmac_s = getHMAC(JSON.stringify(data));
 
     alert(url);
-
     request["data"] = JSON.stringify(data);
+
     if (hmac_s != null){
       request["hmac"] = hmac_s;
     }
@@ -68,6 +67,7 @@ function sendHTTPRequest(data, url, method, onResponse){
     xmlhttp.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200){
         response = xmlhttp.responseText;
+        alert(response);
         onResponse(JSON.parse(response));
       }
     }
@@ -78,7 +78,7 @@ function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
       var jdata = {}
-      var hmac_s = getHMAC();
+      var hmac_s = getHMAC(JSON.stringify(data));
 
       jdata["data"] = JSON.stringify(data);
       if (hmac_s != null){
@@ -224,8 +224,6 @@ function renderCommentDiagram(messages){
       jdata[writer] = jdata[writer]+1;
     }
   }
-
-  console.log(jdata);
 
   var diagram1 = c3.generate({
     bindto: '#diagram2',

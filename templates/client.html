@@ -125,40 +125,7 @@
           </div>
 
           <div id="browse" class="tab-pane" value="browse">
-              <div id="user" class="browsetab" style="display:none">
-                <div class="holder">
-                    <div class="leftSide">
-                        <div id="otherUserData" class="userData">
-                            <h3>User Information:</h3>
-                            <ul class="dataList">
-                                <li>Name: <span id="othNameField"></span></li>
-                                <li>Family Name: <span id="othFNameField"></span></li>
-                                <li>Country: <span id="othCountryField"></span></li>
-                                <li>City: <span id="othCityField"></span></li>
-                                <li>Gender: <span id="othGenderField"></span></li>
-                                <li>Email: <span id="othEmailField"></span></li>
-                            </ul>
-                        </div>
-
-                        <form id="msgToForm">
-                            <div>
-                              <label for="message">Message</label>
-                              <input type="text" name="message" id="msgTo" required>
-                            </div>
-                            <input class="button" type="submit" value="Send message">
-                        </form>
-                        <a id="back" href="javascript:void(0)">Back</a>
-                    </div>
-
-                    <div id="rightSide">
-                        <input id="msgReloadButton" class="button" type="submit" value="Reload Messages">
-                        <div id="messageDiv">
-                        </div>
-                    </div>
-                </div>
-              </div>
-
-              <div id="search" class="browsetab" style="display:block">
+              <div id="search" class="browsetab">
                 <div class="container">
                   <div class="col-md-4 col-md-offset-4 col-xs-12">
                     <h3> Search user </h3>
@@ -173,6 +140,34 @@
                       <span id="messageSearch"><span>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <div id="userPage" class="browsetab" style="display:none">
+                <div class="col-md-offset-1 col-md-5">
+                  <div id="otherUserData">
+                      <h3>User Information:</h3>
+                      <div class="dataList">
+                        <p>Name: <span id="othNameField"></span></p>
+                        <p>Family Name: <span id="othFNameField"></span></p>
+                        <p>Country: <span id="othCountryField"></span></p>
+                        <p>City: <span id="othCityField"></span></p>
+                        <p>Gender: <span id="othGenderField"></span></p>
+                        <p>Email: <span id="othEmailField"></span></p>
+                      </div>
+                  </div>
+                  <form id="msgToForm">
+                    <div class="form-group">
+                        <h3> Message </h3>
+                        <input class="form-control" type="text" name="message" id="msgTo" required>
+                    </div>
+                    <input class="btn btn-default" type="submit" value="Send message">
+                  </form>
+                </div>
+                <div class="col-md-5">
+                  <h3> Messages: </h3>
+                  <div class="scroll-y" id="messageDiv"></div>
+                  <!-- cada tweet un jumbotron  -->
                 </div>
               </div>
       </div>

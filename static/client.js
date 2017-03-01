@@ -23,7 +23,7 @@ displayView = function() {
         renderCurrentUserPage();
         renderDiagrams();
         renderInterval = window.setInterval(function(){
-          //renderDiagrams();
+          renderDiagrams();
         }, 5000);
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
@@ -334,17 +334,10 @@ function signOut() {
 }
 
 
-function openTab(tabName) {
+function openUserTab() {
 
-    var i;
-    var menu = document.getElementsByClassName("browsetab");
+    document.getElementById("userPage").style.display = "block";
 
-
-    for (i = 0; i < menu.length; i++) {
-        menu[i].style.display = "none";
-    }
-
-    document.getElementById(tabName).style.display = "block";
 }
 
 
@@ -533,11 +526,12 @@ function searchUser() {
       } else {
           userData = server_msg.data;
           renderOtherUserPage(userData);
-          openTab("user");
+          openUserTab();
       }
     });
     return false;
 }
+
 
 function showSearchError(message) {
     document.getElementById("messageSearch").innerHTML = message;
@@ -558,13 +552,10 @@ function renderOtherUserPage(userData) {
 }
 
 
-function back() {
-    openTab("search");
-}
-
 function allowDrop(ev) {
     ev.preventDefault();
 }
+
 
 function drag(ev) {
     var img = document.createElement("img");
@@ -573,6 +564,7 @@ function drag(ev) {
     ev.dataTransfer.setDragImage(img, 0, 0);
     ev.dataTransfer.setData("text", ev.target.innerHTML);
 }
+
 
 function drop(ev) {
     ev.preventDefault();
@@ -597,13 +589,9 @@ function bindFunctionsWelcome() {
 function bindFunctionsProfile() {
 
     document.getElementById("logout").onclick = signOut;
-    document.getElementById("back").onclick = back;
-    document.getElementById("msgReloadButton").onclick = reloadMessages;
-
     document.getElementById("msgForm").onsubmit = sendMessage;
     document.getElementById("msgToForm").onsubmit = sendMessageTo;
     document.getElementById("userSearchForm").onsubmit = searchUser;
     document.getElementById("changePassForm").onsubmit = changePassword;
-
     document.getElementById("s_rpassword").onkeyup = checkPasswords;
 }

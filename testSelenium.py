@@ -13,7 +13,7 @@ pathOier = '/home/osaizar/MEGAsync/3.kursoa/Web programming/LAB/WebProgramming_L
 class PythonOrgSearch(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Chrome(pathOier)
+        self.driver = webdriver.Chrome(pathIsma)
 
     def testTwidder(self):
         driver = self.driver
@@ -36,7 +36,7 @@ class PythonOrgSearch(unittest.TestCase):
         driver.find_element_by_name("Rspassword").send_keys("testpw")
         driver.find_element_by_xpath("//input[@value='Sign Up']").click()
 
-
+        time.sleep(1)
         if "User successfully created" in driver.find_element_by_id("messageSignUpSucc").get_attribute("innerHTML"):
             print "user created"
         if "Email already exists" in driver.find_element_by_id("messageSignUpErr").get_attribute("innerHTML"):
@@ -92,6 +92,8 @@ class PythonOrgSearch(unittest.TestCase):
         driver.find_element_by_name("rnew_password").clear()
         driver.find_element_by_name("rnew_password").send_keys("testpw")
         driver.find_element_by_xpath("//input[@value='Change Password']").click()
+
+        time.sleep(1)
         if "Password changed" in driver.find_element_by_id("messageChPasswordS").get_attribute("innerHTML"):
             print "password changed"
 
@@ -103,6 +105,9 @@ class PythonOrgSearch(unittest.TestCase):
 
 
         time.sleep(4)
+        driver.find_element_by_id("logout").click()
+
+        time.sleep(5)
 
 def tearDown(self):
         self.driver.close()

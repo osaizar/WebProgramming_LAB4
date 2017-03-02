@@ -7,6 +7,7 @@ import string
 import random
 import json
 import re
+import time
 
 from User import User
 from Message import Message, MessageList
@@ -88,56 +89,75 @@ def check_send_message_data(data, hmac):
         return True, None
 
 
-def check_token(data):
-    if data == None:
-        abort(400)
+def check_search_data(data, hmac):
+    valid, response = check_HMAC(data, hmac)
+    if not valid:
+        return valid, response
     try:
         data = json.loads(data)
-        if not (data["token"]):
+        if not data["userEmail"]:
             abort(400)
     except:
         abort(400)
-
     return True, None
 
 
 def check_HMAC(data, hmac):
-    valid, response = check_token(data)
+    valid, response = check_email(data)
     if not valid:
         return valid, response
+
+    valid, response = check_timestamp(data)
+    if not valid:
+        return valid, response
+
+
     if hmac == None:
         abort(400)
 
     jdata = json.loads(data)
     token = db.get_session_token_by_email(jdata["email"])
-    ghmac = crypto.get_hmac(data, token);
 
-    if not ghmac:
-        print "ilegal character"
+    if token == None:
+        return False, ReturnedData(False, "You are not logged in!").createJSON()
+
+    generated_hmac = crypto.get_hmac(data, token);
+
+    if generated_hmac == None:
         return False, ReturnedData(False, "Ilegal character in message").createJSON()
 
-    if ghmac != hmac:
+    if generated_hmac != hmac:
         return False, ReturnedData(False, "HMAC is not correct").createJSON()
 
     return True, None
 
 
-def check_token_and_HMAC(data, hmac):
-    valid, response = check_HMAC(data, hmac)
-    if not valid:
-        return valid, response
-    else:
-        return True, None
-
-
-def check_token_email_and_HMAC(data, hmac):
-    valid, response = check_HMAC(data, hmac)
-    if not valid:
-        return valid, response
+def check_email(data):
+    if data == None:
+        abort(400)
     try:
         data = json.loads(data)
-        if not data["email"]:
+        if not (data["email"]):
             abort(400)
     except:
         abort(400)
+
+    return True, None
+
+
+def check_timestamp(data):
+    if data == None:
+        abort(400)
+    try:
+        data = json.loads(data)
+        if not (data["timestamp"]):
+            abort(400)
+
+        timestamp  = int(time.time() / (60*5))
+
+        if data["timestamp"] != timestamp:
+            return False, ReturnedData(False, "The timestamp is not correct").createJSON()
+    except:
+        abort(400)
+
     return True, None

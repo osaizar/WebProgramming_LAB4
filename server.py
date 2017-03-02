@@ -95,12 +95,12 @@ def connect():
             jdata = ws.receive()
             data = json.loads(jdata)["data"]
             hmac = json.loads(jdata)["hmac"]
-            valid, response = checker.check_token_and_HMAC(data, hmac)
+            valid, response = checker.check_HMAC(data, hmac)
             if not valid:
                 ws.send(response)
                 return ""
             data = json.loads(data)
-            userId = db.get_userId_by_token(data["token"])
+            userId = db.get_userId_by_email(data["email"])
             if userId == None:
                 ws.send(ReturnedData(False, "You are not loged in!").createJSON())
                 return ""
@@ -131,12 +131,12 @@ def get_current_conn_users():
         jdata = ws.receive()
         data = json.loads(jdata)["data"]
         hmac = json.loads(jdata)["hmac"]
-        valid, response = checker.check_token_and_HMAC(data, hmac)
+        valid, response = checker.check_HMAC(data, hmac)
         if not valid:
             ws.send(response)
             return ""
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
+        userId = db.get_userId_by_email(data["email"])
         if userId == None:
             ws.send(ReturnedData(False, "You are not loged in!").createJSON())
             return ""
@@ -160,12 +160,12 @@ def get_conn_user_history():
         jdata = ws.receive()
         data = json.loads(jdata)["data"]
         hmac = json.loads(jdata)["hmac"]
-        valid, response = checker.check_token_and_HMAC(data, hmac)
+        valid, response = checker.check_HMAC(data, hmac)
         if not valid:
             ws.send(response)
             return ""
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
+        userId = db.get_userId_by_email(data["email"])
         if userId == None:
             ws.send(ReturnedData(False, "You are not loged in!").createJSON())
             return ""
@@ -185,13 +185,11 @@ def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
 
 @app.route("/sign_in", methods=["POST"])
 def sign_in():
-    print "sign in"
     data = request.get_json(silent = True)["data"] # get data
     valid, response = checker.check_sign_in_data(data)
     if not valid:
         return response
     try:
-        print "request valid"
         data = json.loads(data)
         userId = db.get_userId_by_email(data["email"])
         if userId == None:
@@ -212,10 +210,11 @@ def sign_in():
 
                 jToken = {}
                 jToken["token"] = token
-                jToken["key"] = key
+                jToken["email"] = user.email
                 jToken = json.dumps(jToken)
 
-                if not db.create_session(token, userId, key):
+
+                if not db.create_session(token, userId):
                     abort(500)
                 if not db.insert_log(userId):
                     abort(500)
@@ -248,23 +247,14 @@ def sign_up():
 def sign_out():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_and_HMAC(data, hmac)
+    valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
     try:
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
-        if userId != None:
-            email = db.get_user_by_id(userId).email
-            if email != None:
-                if db.delete_session(data["token"]):
-                    del connected_users[email]
-                return ReturnedData(True, "Signed out").createJSON()
-            else:
-                return ReturnedData(True, "Invalid email").createJSON() # no deberia salir nunca
-
-        else:
-            return ReturnedData(False, "You are not logged in (Invalid token)").createJSON()
+        if db.delete_session_by_email(data["email"]):
+            del connected_users[email]
+        return ReturnedData(True, "Signed out").createJSON()
     except:
         abort(500)
 
@@ -278,11 +268,9 @@ def change_password():
         return response
     try:
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
-        user = user = db.get_user_by_id(userId)
-        if userId == None:
-            return ReturnedData(False, "The token is not correct").createJSON()
-        elif user.password != crypto.get_hash(data["old_password"], user.salt):
+        userId = db.get_userId_by_email(data["email"])
+        user = db.get_user_by_id(userId)
+        if user.password != crypto.get_hash(data["old_password"], user.salt):
             return ReturnedData(False, "The password is not correct").createJSON()
         else:
             salt = crypto.create_salt()
@@ -292,21 +280,18 @@ def change_password():
     except:
         abort(500)
 
-@app.route("/get_user_data_by_token", methods=["POST"])
-def get_user_data_by_token():
+@app.route("/get_user_data", methods=["POST"])
+def get_user_data():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_and_HMAC(data, hmac)
+    valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
     try:
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
-        if userId == None:
-            return ReturnedData(False, "You are not logged in (Invalid token)").createJSON()
-        else:
-            user = db.get_user_by_id(userId)
-            return ReturnedData(True, "User found", user.createJSON()).createJSON()
+        userId = db.get_userId_by_email(data["email"])
+        user = db.get_user_by_id(userId)
+        return ReturnedData(True, "User found", user.createJSON()).createJSON()
     except:
         abort(500)
 
@@ -315,21 +300,17 @@ def get_user_data_by_token():
 def get_user_data_by_email():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_email_and_HMAC(data, hmac)
+    valid, response = checker.check_search_data(data, hmac)
     if not valid:
         return response
     try:
         data = json.loads(data)
-        myUserId = db.get_userId_by_token(data["token"])
-        if myUserId  == None:
-            return ReturnedData(False, "You are not logged in (Invalid token)").createJSON()
+        userId = db.get_userId_by_email(data["userEmail"])
+        if userId == None:
+            return ReturnedData(False, "Invalid email").createJSON()
         else:
-            userId = db.get_userId_by_email(data["email"])
-            if userId == None:
-                return ReturnedData(False, "Invalid email").createJSON()
-            else:
-                user = db.get_user_by_id(userId)
-                return ReturnedData(True, "User found", user.createJSON()).createJSON()
+            user = db.get_user_by_id(userId)
+            return ReturnedData(True, "User found", user.createJSON()).createJSON()
     except:
         abort(500)
 
@@ -337,18 +318,14 @@ def get_user_data_by_email():
 def get_user_messages_by_token():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_and_HMAC(data, hmac)
+    valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
     try:
         data = json.loads(data)
-        userId = db.get_userId_by_token(data["token"])
-
-        if userId == None:
-            return ReturnedData(False, "You are not logged in (Invalid token)").createJSON()
-        else:
-            messages = db.get_messages_by_user(userId)
-            return ReturnedData(True, "Messages found", messages.createJSON()).createJSON()
+        userId = db.get_userId_by_email(data["email"])
+        messages = db.get_messages_by_user(userId)
+        return ReturnedData(True, "Messages found", messages.createJSON()).createJSON()
     except:
         abort(500)
 
@@ -357,20 +334,17 @@ def get_user_messages_by_token():
 def get_user_messages_by_email():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
-    valid, response = checker.check_token_email_and_HMAC(data, hmac)
+    valid, response = checker.check_search_data(data, hmac)
     if not valid:
         return response
     try:
         data = json.loads(data)
-        if db.get_userId_by_token(data["token"]) == None:
-            return ReturnedData(False, "You are not logged in (Invalid token)").createJSON()
+        userId = db.get_userId_by_email(data["userEmail"])
+        if userId == None:
+            return ReturnedData(False, "Invalid email").createJSON()
         else:
-            userId = db.get_userId_by_email(data["email"])
-            if userId == None:
-                return ReturnedData(False, "Invalid email").createJSON()
-            else:
-                messages = db.get_messages_by_user(userId)
-                return ReturnedData(True, "Messages found", messages.createJSON()).createJSON()
+            messages = db.get_messages_by_user(userId)
+            return ReturnedData(True, "Messages found", messages.createJSON()).createJSON()
     except:
         abort(500)
 
@@ -383,10 +357,7 @@ def send_message():
         return response
     try:
         data = json.loads(data)
-        writerId = db.get_userId_by_token(data["token"])
-        if writerId == None:
-            return ReturnedData(False, "You are not logged in (You are not logged in (Invalid token))").createJSON()
-
+        writerId = db.get_userId_by_email(data["email"])
         writer = db.get_user_by_id(writerId)
 
         msg = Message(writer.email, data["reader"], data["msg"])

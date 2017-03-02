@@ -10,9 +10,10 @@ def create_salt(size=10, chars=string.ascii_uppercase + string.digits):
 
 def get_hash(password, salt):
     pwsalt = password+salt
+
     for i in range(1000):
-        hashlib.sha256(pwsalt).hexdigest()
-        
+        pwsalt =  hashlib.sha256(pwsalt).hexdigest()
+
     return pwsalt
 
 
@@ -20,7 +21,6 @@ def get_hmac(data, key):
     try:
         b64data = base64.b64encode(data);
         shmac = hmac.HMAC(str(key), b64data, hashlib.sha256).hexdigest()
-        print shmac
         return shmac
     except:
-        return False
+        return None

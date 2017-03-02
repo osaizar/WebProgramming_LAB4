@@ -96,9 +96,9 @@ def get_user_number():
     return result["count"]
 
 
-def create_session(token, userId, key):
-    cur = run_query("INSERT INTO Session (token, userId, key)\
-                    VALUES('%s', %s,'%s')" % (token, userId, key))
+def create_session(token, userId):
+    cur = run_query("INSERT INTO Session (token, userId)\
+                    VALUES('%s', %s)" % (token, userId))
     if cur.rowcount == 1:
         return True
     else:

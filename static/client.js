@@ -41,6 +41,8 @@ function getHMAC(data){
   if (token == null || token == "undefined"){
     return null;
   }else{
+    var hmac_s = CryptoJS.HmacSHA256(btoa(data), token).toLocaleString();
+    alert("hmac: "+hmac_s+" data: "+data+" token: "+ token);
     return CryptoJS.HmacSHA256(btoa(data), token).toLocaleString();
   }
 }
@@ -51,10 +53,12 @@ function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     var response = "";
     var request = {};
-    var hmac_s = getHMAC(JSON.stringify(data));
+    var hmac_s = "";
 
+    data["timestamp"] = parseInt(Date.now()/(1000*60*5)); // 5 minutes of margin
     request["data"] = JSON.stringify(data);
 
+    hmac_s = getHMAC(JSON.stringify(data));
     if (hmac_s != null){
       request["hmac"] = hmac_s;
     }
@@ -76,9 +80,12 @@ function sendToWebSocket(data, url, onRespose){
     var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
     waitForConnection(function(){
       var jdata = {}
-      var hmac_s = getHMAC(JSON.stringify(data));
+      var hmac_s = "";
+
+      data["timestamp"] = parseInt(Date.now()/(1000*60*5)); // 5 minutes of margin
 
       jdata["data"] = JSON.stringify(data);
+      hmac_s = getHMAC(JSON.stringify(data));
       if (hmac_s != null){
         jdata["hmac"] = hmac_s;
       }
@@ -122,7 +129,7 @@ function waitForConnection(callback, socket){
 
 
 function connectToWebSocket(){
-  var data = {"token": localStorage.getItem("token")};
+  var data = {"email": localStorage.getItem("email")};
   sendToWebSocket(data, "/connect", function(server_msg){
     if(!server_msg.success){
       signOut();
@@ -143,7 +150,7 @@ function renderDiagrams() {
 }
 
 function renderConnectedUserDiagram(){
-  var data = {"token": localStorage.getItem("token")};
+  var data = {"email": localStorage.getItem("email")};
   sendToWebSocket(data, "/get_current_conn_users", function(server_msg){
   var jdata = {};
   var fields = [];
@@ -171,7 +178,7 @@ function renderConnectedUserDiagram(){
 
 
 function renderUserHistoryDiagram(){
-  var data = {"token": localStorage.getItem("token")};
+  var data = {"email": localStorage.getItem("email")};
   sendToWebSocket(data, "/get_conn_user_history", function(server_msg){
 
       var x = [];
@@ -260,7 +267,7 @@ function signIn() {
       } else {
           document.forms["loginForm"].reset();
           localStorage.setItem("token", server_msg.data.token);
-          localStorage.setItem("key", server_msg.data.key);
+          localStorage.setItem("email", server_msg.data.email);
           displayView();
       }
     });
@@ -340,13 +347,13 @@ function signUp() {
 
 function signOut() {
 
-    var token = localStorage.getItem("token");
-    sendHTTPRequest({"token":token}, "/sign_out", "POST", function(server_msg){
+    var email = localStorage.getItem("email");
+    sendHTTPRequest({"email":email}, "/sign_out", "POST", function(server_msg){
       if(!server_msg.success){
         showChangePasswordError(server_msg.message);
       }
       localStorage.setItem("token", "undefined"); // TODO: Mirad esto plis
-      localStorage.setItem("key", "undefined");
+      localStorage.setItem("email", "undefined");
       displayView();
     });
 }
@@ -363,8 +370,8 @@ function changePassword() {
 
     var npassword = document.forms["changePassForm"]["new_password"].value;
     var cpassword = document.forms["changePassForm"]["current_password"].value;
-    var token = localStorage.getItem("token");
-    var data = {"token":token, "old_password": cpassword, "new_password": npassword};
+    var email = localStorage.getItem("email");
+    var data = {"email":email, "old_password": cpassword, "new_password": npassword};
     sendHTTPRequest(data, "/change_password", "POST", function(server_msg){
       if (!server_msg.success) {
           showChangePasswordError(server_msg.message);
@@ -394,9 +401,9 @@ function showChangePasswordSuccess(message) {
 
 function renderCurrentUserPage() {
 
-    var token = localStorage.getItem("token");
-    var data = {"token":token};
-    sendHTTPRequest(data, "/get_user_data_by_token", "POST", function(server_msg) {
+    var email = localStorage.getItem("email");
+    var data = {"email":email};
+    sendHTTPRequest(data, "/get_user_data", "POST", function(server_msg) {
       var userData;
 
       if (server_msg.success) {
@@ -419,8 +426,8 @@ function renderCurrentUserPage() {
 
 function sendMessage() {
 
-    var token = localStorage.getItem("token");
-    sendHTTPRequest({"token":token}, "/get_user_data_by_token", "POST", function(server_msg){
+    var email = localStorage.getItem("email");
+    sendHTTPRequest({"email":email}, "/get_user_data", "POST", function(server_msg){
       var data;
 
       if (server_msg.success) {
@@ -445,12 +452,12 @@ function sendMessage() {
 
 function sendMessageTo() {
 
-    var token = localStorage.getItem("token");
-    var email = document.getElementById("othEmailField").innerHTML;
+    var email = localStorage.getItem("email");
+    var reader = document.getElementById("othEmailField").innerHTML;
     alert(email);
     var msg = document.forms["msgToForm"]["message"].value;
 
-    sendHTTPRequest({"token":token, "msg":msg, "reader": email}, "/send_message", "POST", function(server_msg){
+    sendHTTPRequest({"email":email, "msg":msg, "reader": reader}, "/send_message", "POST", function(server_msg){
       reloadOtherUserMessages();
       document.getElementById("msgTo").value = "";
     });
@@ -460,8 +467,8 @@ function sendMessageTo() {
 
 function reloadMessages() {
 
-    var token = localStorage.getItem("token");
-    sendHTTPRequest({"token":token}, "/get_user_messages_by_token", "POST", function(server_msg) {
+    var email = localStorage.getItem("email");
+    sendHTTPRequest({"email":email}, "/get_user_messages_by_token", "POST", function(server_msg) {
       var messages;
 
       if (server_msg.success) {
@@ -497,9 +504,9 @@ function reloadMessages() {
 
 function reloadOtherUserMessages() {
 
-    var token = localStorage.getItem("token");
-    var email = document.getElementById("othEmailField").innerHTML;
-    sendHTTPRequest({"token":token, "email":email}, "/get_user_messages_by_email", "POST", function(server_msg){
+    var email = localStorage.getItem("email");
+    var userEmail = document.getElementById("othEmailField").innerHTML;
+    sendHTTPRequest({"email":email, "userEmail":userEmail}, "/get_user_messages_by_email", "POST", function(server_msg){
       var messages;
 
       if (server_msg.success) {
@@ -533,9 +540,9 @@ function reloadOtherUserMessages() {
 
 function searchUser() {
 
-    var token = localStorage.getItem("token");
-    var email = document.forms["userSearchForm"]["email"].value;
-    sendHTTPRequest({"token":token,"email":email}, "/get_user_data_by_email", "POST", function(server_msg){
+    var email = localStorage.getItem("email");
+    var userEmail = document.forms["userSearchForm"]["email"].value;
+    sendHTTPRequest({"email":email,"userEmail":userEmail}, "/get_user_data_by_email", "POST", function(server_msg){
       var userData;
 
       if (!server_msg.success) {

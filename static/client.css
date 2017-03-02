@@ -82,9 +82,9 @@ ul.navbar li a:focus, {
   margin-right: 2em;
 }
 
-
-.holder{
-  margin: 0 auto;
+<div class="row">
+            <img src="wimage.png" />
+        </div>
   width: 600px;
   height: 400px;
   margin-top: 100px;
@@ -111,6 +111,17 @@ ul.navbar li a:focus, {
   margin-right: 10px;
 }
 
+@media (max-width: 768px) {
+	.col-xs-12 {
+		margin-top:20px;
+	}
+}
+
+
+	.col-md-6{
+		margin-top:20px;
+	}
+
 #signupTitle{
   margin-top: 0px;
 }
@@ -119,13 +130,13 @@ ul.navbar li a:focus, {
   background-color: white;
 }
 
-#loginForm + #signupForm{
+/*#loginForm + #signupForm{
   height: 78%;
 }
 
 #signupForm{
   margin-top: 10px;
-}
+}*/
 
 /* Profile page */
 

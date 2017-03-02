@@ -73,7 +73,7 @@ def clientcss():
 
 @app.route("/wimage.png")
 def wimage():
-    return app.send_static_file("wimage.png")
+    return app.send_static_file("twidder_header.png")
 
 @app.route("/dragImage.png")
 def dragImage():

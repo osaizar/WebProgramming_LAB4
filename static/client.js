@@ -256,7 +256,7 @@ function signIn() {
     var data = {"email":email, "password":password};
     sendHTTPRequest(data, "/sign_in", "POST", function(server_msg){
       if (!server_msg.success) {
-          showSignUpError(server_msg.message);
+          showSignInError(server_msg.message);
       } else {
           document.forms["loginForm"].reset();
           localStorage.setItem("token", server_msg.data.token);
@@ -267,6 +267,17 @@ function signIn() {
     return false;
 }
 
+function showSignInError(message) { // se usa en sigUp y signIn
+    document.getElementById("messageSignInErr").innerHTML = message;
+    document.getElementById("signInError").style.display = "block";
+    document.getElementById("signInSucc").style.display = "none";
+}
+
+function showSignInSuccess(message) { // se usa en sigUp y signIn
+    document.getElementById("messageSignInSucc").innerHTML = message;
+    document.getElementById("signInSuccess").style.display = "block";
+    document.getElementById("signInError").style.display = "none";
+}
 
 function showSignUpError(message) { // se usa en sigUp y signIn
     document.getElementById("messageSignUpErr").innerHTML = message;

@@ -216,12 +216,16 @@ def sign_in():
 
                 if not db.create_session(token, userId):
                     abort(500)
-                if not db.insert_log(userId):
+                if not insert_log(userId):
                     abort(500)
 
                 return ReturnedData(True, "User signed in", jToken).createJSON()
     except:
         abort(500)
+
+def insert_log(userId):
+    return db.insert_log(userId)
+
 
 @app.route("/sign_up", methods=["POST"])
 def sign_up():

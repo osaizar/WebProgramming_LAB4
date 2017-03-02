@@ -42,7 +42,6 @@ function getHMAC(data){
     return null;
   }else{
     var hmac_s = CryptoJS.HmacSHA256(btoa(data), token).toLocaleString();
-    alert("hmac: "+hmac_s+" data: "+data+" token: "+ token);
     return CryptoJS.HmacSHA256(btoa(data), token).toLocaleString();
   }
 }
@@ -440,11 +439,10 @@ function sendMessage() {
 
       document.forms["msgForm"]["message"].value = "";
 
-      var server_msg = sendHTTPRequest({"token":token, "msg":msg,"reader": data.email}, "/send_message", "POST");
-
-      reloadMessages();
-
-      document.getElementById("msgToMe").value = "";
+      var server_msg = sendHTTPRequest({"email":email, "msg":msg,"reader": data.email}, "/send_message", "POST", function (server_msg) {
+        reloadMessages();
+        document.getElementById("msgToMe").value = "";
+      });
     });
     return false;
 }
@@ -454,7 +452,6 @@ function sendMessageTo() {
 
     var email = localStorage.getItem("email");
     var reader = document.getElementById("othEmailField").innerHTML;
-    alert(email);
     var msg = document.forms["msgToForm"]["message"].value;
 
     sendHTTPRequest({"email":email, "msg":msg, "reader": reader}, "/send_message", "POST", function(server_msg){

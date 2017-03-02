@@ -21,13 +21,8 @@ displayView = function() {
         bindFunctionsProfile();
         connectToWebSocket();
         renderCurrentUserPage();
-        renderDiagrams();
-        renderInterval = window.setInterval(function(){
-          renderDiagrams();
-        }, 5000);
     } else if (viewId == WELCOME) {
         bindFunctionsWelcome();
-        window.clearInterval(renderInterval);
     }
 };
 
@@ -109,6 +104,15 @@ function handleSocketMessage(message) {
       break;
     case "You are not loged in!":
       signOut();
+      break;
+    case "reload:messages":
+      reloadMessages();
+      break;
+    case "reload:connected":
+      renderConnectedUserDiagram();
+      break;
+    case "reload:log":
+      renderUserHistoryDiagram();
       break;
     default:
       break;
@@ -219,7 +223,7 @@ function renderCommentDiagram(messages){
   var jdata = {};
   var fields = [];
 
-  if (messages != null || messages.length == 0){
+  if (messages != ""){
     for (var i = 0; i < messages.length; i++) {
       var writer = messages[i].writer;
       if (fields.indexOf(writer) == -1){
@@ -276,7 +280,7 @@ function signIn() {
 function showSignInError(message) { // se usa en sigUp y signIn
     document.getElementById("messageSignInErr").innerHTML = message;
     document.getElementById("signInError").style.display = "block";
-    document.getElementById("signInSucc").style.display = "none";
+    //document.getElementById("signInSucc").style.display = "none"; da error
 }
 
 function showSignInSuccess(message) { // se usa en sigUp y signIn
@@ -418,7 +422,7 @@ function renderCurrentUserPage() {
       document.getElementById("cityField").innerHTML = userData.city;
       document.getElementById("emailField").innerHTML = userData.email;
 
-      //reloadMessages();
+      reloadMessages();
     });
 }
 
@@ -608,7 +612,7 @@ function bindFunctionsWelcome() {
 
 
 function bindFunctionsProfile() {
-
+    document.getElementById("navAccount").onclick = renderDiagrams;
     document.getElementById("logout").onclick = signOut;
     document.getElementById("msgForm").onsubmit = sendMessage;
     document.getElementById("msgToForm").onsubmit = sendMessageTo;

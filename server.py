@@ -185,10 +185,12 @@ def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
 
 def send_to_websocket(msg, email=False):
     if email:
+        print "Sending message only to "+email
         s = connected_users[email]
         s.send(ReturnedData(False, msg).createJSON())
     else:
-        for email, s in connected_users.iteritems():
+        for m, s in connected_users.iteritems():
+            print "Sending message to "+m
             s.send(ReturnedData(False, msg).createJSON())
 
 
@@ -209,11 +211,12 @@ def sign_in():
             if user.password != crypto.get_hash(data["password"], user.salt):
                 return ReturnedData(False, "The password is not correct").createJSON()
             else:
+
                 if data["email"] in connected_users:
-                    s = connected_users[data["email"]]
-                    s.send(ReturnedData(False, "close:session").createJSON())
-                    db.delete_session_by_email(data["email"])
+                    send_to_websocket("close:session", data["email"])
                     del connected_users[data["email"]]
+
+                db.delete_session_by_email(data["email"])
 
                 token = token_generator()
                 key = token_generator()
@@ -224,7 +227,7 @@ def sign_in():
                 jToken = json.dumps(jToken)
 
 
-                if not db.create_session(token, userId):
+                if not create_session(token, userId):
                     abort(500)
                 if not insert_log(userId):
                     abort(500)
@@ -233,9 +236,13 @@ def sign_in():
     except:
         abort(500)
 
-def insert_log(userId):
-    return db.insert_log(userId)
+def create_session(token, userId):
+    send_to_websocket("reload:connected")
+    return db.create_session(token, userId)
 
+def insert_log(userId):
+    send_to_websocket("reload:log")
+    return db.insert_log(userId)
 
 @app.route("/sign_up", methods=["POST"])
 def sign_up():
@@ -266,11 +273,15 @@ def sign_out():
         return response
     try:
         data = json.loads(data)
-        if db.delete_session_by_email(data["email"]):
+        if delete_session_by_email(data["email"]):
             del connected_users[email]
         return ReturnedData(True, "Signed out").createJSON()
     except:
         abort(500)
+
+def delete_session_by_email(email):
+    send_to_websocket("reload:connected")
+    return db.delete_session_by_email(userId)
 
 
 @app.route("/change_password", methods=["POST"])
@@ -383,10 +394,15 @@ def send_message():
         if fromId == None:
             return ReturnedData(False, "Invalid writer").createJSON()
         else:
-            db.insert_message(msg)
+            insert_message(msg)
             return ReturnedData(True, "Message sent").createJSON()
     except:
         abort(500)
+
+def insert_message(msg):
+    send_to_websocket("reload:messages", msg.reader)
+    db.insert_message(msg)
+
 
 if __name__ == "__main__":
     print "Starting test server at "+LADDR+":"+str(LPORT)

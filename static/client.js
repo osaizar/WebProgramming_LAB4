@@ -93,7 +93,7 @@ function sendToWebSocket(data, url, onRespose){
       socket.onmessage = function(s){
         response = JSON.parse(s.data);
         if (!response.success){
-          handleSocketError(response.message)
+          handleSocketMessage(response.message)
         }else{
           onRespose(response);
         }
@@ -102,7 +102,7 @@ function sendToWebSocket(data, url, onRespose){
 }
 
 
-function handleSocketError(message) {
+function handleSocketMessage(message) {
   switch (message) {
     case "close:session":
       signOut();
@@ -465,7 +465,7 @@ function sendMessageTo() {
 function reloadMessages() {
 
     var email = localStorage.getItem("email");
-    sendHTTPRequest({"email":email}, "/get_user_messages_by_token", "POST", function(server_msg) {
+    sendHTTPRequest({"email":email}, "/get_user_messages", "POST", function(server_msg) {
       var messages;
 
       if (server_msg.success) {

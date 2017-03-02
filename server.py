@@ -183,6 +183,16 @@ def get_conn_user_history():
 def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+def send_to_websocket(msg, email=False):
+    if email:
+        s = connected_users[email]
+        s.send(ReturnedData(False, msg).createJSON())
+    else:
+        for email, s in connected_users.iteritems():
+            s.send(ReturnedData(False, msg).createJSON())
+
+
+
 @app.route("/sign_in", methods=["POST"])
 def sign_in():
     data = request.get_json(silent = True)["data"] # get data
@@ -318,8 +328,8 @@ def get_user_data_by_email():
     except:
         abort(500)
 
-@app.route("/get_user_messages_by_token", methods=["POST"])
-def get_user_messages_by_token():
+@app.route("/get_user_messages", methods=["POST"])
+def get_user_messages():
     data = request.get_json(silent = True)["data"]
     hmac = request.get_json(silent = True)["hmac"]
     valid, response = checker.check_HMAC(data, hmac)

@@ -37,11 +37,11 @@ window.onload = function() {
 };
 
 function getHMAC(data){
-  var key = localStorage.getItem("key");
-  if (key == null || key == "undefined"){
+  var token = localStorage.getItem("token");
+  if (token == null || token == "undefined"){
     return null;
   }else{
-    return CryptoJS.HmacSHA256(btoa(data), key).toLocaleString();
+    return CryptoJS.HmacSHA256(btoa(data), token).toLocaleString();
   }
 }
 
@@ -234,13 +234,13 @@ function renderCommentDiagram(messages){
           type:'pie'
         },
     });
+  }else{
+    var diagram = document.getElementById("diagram2");
+    var h4 = document.createElement("h4");
+    h4.innerHTML = "You have no messages";
+    diagram.innerHTML = "";
+    diagram.appendChild(h4);
   }
-  var diagram = document.getElementById("diagram2");
-  var h4 = document.createElement("h4");
-  h4.innerHTML = "You have no messages";
-  diagram.innerHTML = "";
-  diagram.appendChild(h4);
-
 }
 
 // END diagrams
@@ -291,7 +291,6 @@ function showSignUpSuccess(message) { // se usa en sigUp y signIn
     document.getElementById("signUpSuccess").style.display = "block";
     document.getElementById("signUpError").style.display = "none";
 }
-
 
 function checkPasswords(type) {
 

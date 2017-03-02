@@ -25,7 +25,6 @@ CREATE TABLE Message
 CREATE TABLE Session
           (token TEXT PRIMARY KEY,
            userId INTEGER,
-					 key TEXT,
            FOREIGN KEY(userId) REFERENCES User(id));
 
 CREATE TABLE Log

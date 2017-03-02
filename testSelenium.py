@@ -27,7 +27,7 @@ class PythonOrgSearch(unittest.TestCase):
         driver.find_element_by_name("country").clear()
         driver.find_element_by_name("country").send_keys("countryTest")
         driver.find_element_by_name("semail").clear()
-        driver.find_element_by_name("semail").send_keys("testSearch@mail.com")
+        driver.find_element_by_name("semail").send_keys("testSearch@mail")
         driver.find_element_by_name("spassword").clear()
         driver.find_element_by_name("spassword").send_keys("testpw")
         driver.find_element_by_name("Rspassword").clear()
@@ -43,7 +43,7 @@ class PythonOrgSearch(unittest.TestCase):
         #sign in
         time.sleep(3)
         driver.find_element_by_name("lemail").clear()
-        driver.find_element_by_name("lemail").send_keys("testSearch@mail.com")
+        driver.find_element_by_name("lemail").send_keys("testSearch@mail")
         driver.find_element_by_name("lpassword").clear()
         driver.find_element_by_name("lpassword").send_keys("testpw")
         driver.find_element_by_xpath("//input[@value='Login']").click()
@@ -58,7 +58,7 @@ class PythonOrgSearch(unittest.TestCase):
         driver.find_element_by_id("navBrowse").click()
 
         driver.find_element_by_name("email").clear()
-        driver.find_element_by_name("email").send_keys("testSearch@mail.com")
+        driver.find_element_by_name("email").send_keys("testSearch@mail")
         driver.find_element_by_xpath("//input[@value='Search User']").click()
 
         #change password

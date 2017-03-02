@@ -109,8 +109,8 @@ def check_HMAC(data, hmac):
         abort(400)
 
     jdata = json.loads(data)
-    key = db.get_session_key(jdata["token"])
-    ghmac = crypto.get_hmac(data, key);
+    token = db.get_session_token_by_email(jdata["email"])
+    ghmac = crypto.get_hmac(data, token);
 
     if not ghmac:
         print "ilegal character"

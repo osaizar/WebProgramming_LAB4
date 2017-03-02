@@ -116,15 +116,17 @@ def get_session_token(userId):
     return token
 
 
-def get_session_key(token):
-    cur = run_query("SELECT * FROM Session WHERE token = '%s'" % token)
+def get_session_token_by_email(email):
+    cur = run_query("SELECT * FROM Session WHERE userId = (SELECT id\
+                                                           FROM User\
+                                                           WHERE email = '%s')" % email)
     result = cur.fetchone()
     if result:
-        key = result["key"]
+        token = result["token"]
     else:
-        key = None
+        token = None
 
-    return key
+    return token
 
 
 def delete_session(token):

@@ -9,7 +9,11 @@ def create_salt(size=10, chars=string.ascii_uppercase + string.digits):
 
 
 def get_hash(password, salt):
-    return hashlib.sha256(password+salt).hexdigest()
+    pwsalt = password+salt
+    for i in range(1000):
+        hashlib.sha256(pwsalt).hexdigest()
+        
+    return pwsalt
 
 
 def get_hmac(data, key):

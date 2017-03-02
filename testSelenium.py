@@ -1,6 +1,7 @@
 import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from random import randint
 
 import time
 
@@ -27,7 +28,7 @@ class PythonOrgSearch(unittest.TestCase):
         driver.find_element_by_name("country").clear()
         driver.find_element_by_name("country").send_keys("countryTest")
         driver.find_element_by_name("semail").clear()
-        driver.find_element_by_name("semail").send_keys("testSearch@mail")
+        driver.find_element_by_name("semail").send_keys("testSearch@mail.com")
         driver.find_element_by_name("spassword").clear()
         driver.find_element_by_name("spassword").send_keys("testpw")
         driver.find_element_by_name("Rspassword").clear()
@@ -43,23 +44,41 @@ class PythonOrgSearch(unittest.TestCase):
         #sign in
         time.sleep(3)
         driver.find_element_by_name("lemail").clear()
-        driver.find_element_by_name("lemail").send_keys("testSearch@mail")
+        driver.find_element_by_name("lemail").send_keys("testSearch@mail.com")
         driver.find_element_by_name("lpassword").clear()
         driver.find_element_by_name("lpassword").send_keys("testpw")
         driver.find_element_by_xpath("//input[@value='Login']").click()
+        time.sleep(2)
+        if "nameTestSearch" in driver.find_element_by_id("nameField").get_attribute("innerHTML"):
+            print "sign in succesfully"
+        else:
+            print "unsuccessfull sign in"
 
         #send message
         time.sleep(5)
-        driver.find_element_by_name("message").send_keys("This is a test message")
+        number = randint(0,5000)
+        driver.find_element_by_name("message").send_keys("This is a random message number " + str(number) )
         driver.find_element_by_xpath("//input[@value='Send message']").click()
 
+        time.sleep(2)
+        if str(number)  in driver.find_element_by_id("userMessageDiv").get_attribute("innerHTML"):
+            print "The message was sent correctly"
+
+        else:
+            print "The message was not sent"
         #find user
-        time.sleep(3)
+        time.sleep(2)
         driver.find_element_by_id("navBrowse").click()
 
         driver.find_element_by_name("email").clear()
-        driver.find_element_by_name("email").send_keys("testSearch@mail")
+        driver.find_element_by_name("email").send_keys("testSearch@mail.com")
         driver.find_element_by_xpath("//input[@value='Search User']").click()
+        time.sleep(2)
+
+        if "nameTestSearch" in driver.find_element_by_id("nameField").get_attribute("innerHTML"):
+            print "browse succesfully"
+        else:
+            print "unsuccessfull browse"
 
         #change password
         time.sleep(3)

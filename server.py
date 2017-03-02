@@ -16,7 +16,6 @@ from Message import Message, MessageList
 from ReturnedData import ReturnedData
 
 
-#TODO: WS exceptions
 #TODO: Dividir en archivos
 
 app = Flask(__name__)
@@ -197,10 +196,15 @@ def send_to_websocket(msg, email=False):
 
 @app.route("/sign_in", methods=["POST"])
 def sign_in():
-    data = request.get_json(silent = True)["data"] # get data
+    try:
+        data = request.get_json(silent = True)["data"] # get data
+    except:
+        abort(400)
+
     valid, response = checker.check_sign_in_data(data)
     if not valid:
         return response
+
     try:
         data = json.loads(data)
         userId = db.get_userId_by_email(data["email"])
@@ -246,7 +250,10 @@ def insert_log(userId):
 
 @app.route("/sign_up", methods=["POST"])
 def sign_up():
-    data = request.get_json(silent = True)["data"] # get data
+    try:
+        data = request.get_json(silent = True)["data"] # get data
+    except:
+        abort(400)
     valid, response = checker.check_sign_up_data(data)
     if not valid:
         return response
@@ -266,8 +273,11 @@ def sign_up():
 
 @app.route("/sign_out", methods=["POST"])
 def sign_out():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
@@ -286,8 +296,11 @@ def delete_session_by_email(email):
 
 @app.route("/change_password", methods=["POST"])
 def change_password():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_change_password_data(data, hmac)
     if not valid:
         return response
@@ -307,8 +320,11 @@ def change_password():
 
 @app.route("/get_user_data", methods=["POST"])
 def get_user_data():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
@@ -323,8 +339,11 @@ def get_user_data():
 
 @app.route("/get_user_data_by_email", methods=["POST"]) #TODO: Name changed, remember to change it on lab3
 def get_user_data_by_email():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_search_data(data, hmac)
     if not valid:
         return response
@@ -341,8 +360,11 @@ def get_user_data_by_email():
 
 @app.route("/get_user_messages", methods=["POST"])
 def get_user_messages():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_HMAC(data, hmac)
     if not valid:
         return response
@@ -357,8 +379,11 @@ def get_user_messages():
 
 @app.route("/get_user_messages_by_email", methods=["POST"])
 def get_user_messages_by_email():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+     abort(400)
     valid, response = checker.check_search_data(data, hmac)
     if not valid:
         return response
@@ -375,8 +400,11 @@ def get_user_messages_by_email():
 
 @app.route("/send_message", methods=["POST"])
 def send_message():
-    data = request.get_json(silent = True)["data"]
-    hmac = request.get_json(silent = True)["hmac"]
+    try:
+        data = request.get_json(silent = True)["data"]
+        hmac = request.get_json(silent = True)["hmac"]
+    except:
+        abort(400)
     valid, response = checker.check_send_message_data(data, hmac)
     if not valid:
         return response

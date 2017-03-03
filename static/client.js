@@ -1,7 +1,3 @@
-// TODO: Cambiar nombres de las funciones de diagramas
-// TODO: Dividir en archivos distintos
-// TODO: Despues de crear cuenta, borrar campos
-
 //Costant declarations
 const WELCOME = "welcomeview";
 const PROFILE = "profileview";
@@ -557,6 +553,7 @@ function searchUser() {
       if (!server_msg.success) {
           showSearchError(server_msg.message);
       } else {
+          document.getElementById("searchError").style.display = "none";
           userData = server_msg.data;
           renderOtherUserPage(userData);
           openUserTab();
@@ -576,9 +573,9 @@ function renderOtherUserPage(userData) {
 
     document.getElementById("othNameField").innerHTML = userData.firstname;
     document.getElementById("othFNameField").innerHTML = userData.familyname;
-    document.getElementById("othCountryField").innerHTML = userData.gender;
-    document.getElementById("othCityField").innerHTML = userData.country;
-    document.getElementById("othGenderField").innerHTML = userData.city;
+    document.getElementById("othCountryField").innerHTML = userData.country;
+    document.getElementById("othCityField").innerHTML = userData.city;
+    document.getElementById("othGenderField").innerHTML = userData.gender;
     document.getElementById("othEmailField").innerHTML = userData.email;
 
     reloadOtherUserMessages();
@@ -603,15 +600,12 @@ function drag(ev) {
     var writer = document.getElementById("msgWriter"+messageID).innerHTML;
     var dragMessage = "\"" + content + "\"" + writer;
     ev.dataTransfer.setData("text", dragMessage);
-    //ev.dataTransfer.setData("text", ev.target.innerHTML);
 }
 
 
 function drop(ev) {
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    //var p = document.createElement('p');
-    //p.innerHTML = "Response for" + data + ": ";
     ev.target.appendChild(data);
 }
 

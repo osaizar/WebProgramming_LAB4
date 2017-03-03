@@ -184,12 +184,10 @@ def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
 
 def send_to_websocket(msg, email=False):
     if email:
-        print "Sending message only to "+email
         s = connected_users[email]
         s.send(ReturnedData(False, msg).createJSON())
     else:
         for m, s in connected_users.iteritems():
-            print "Sending message to "+m
             s.send(ReturnedData(False, msg).createJSON())
 
 
@@ -284,14 +282,14 @@ def sign_out():
     try:
         data = json.loads(data)
         if delete_session_by_email(data["email"]):
-            del connected_users[email]
+            del connected_users[data["email"]]
         return ReturnedData(True, "Signed out").createJSON()
     except:
         abort(500)
 
 def delete_session_by_email(email):
     send_to_websocket("reload:connected")
-    return db.delete_session_by_email(userId)
+    return db.delete_session_by_email(email)
 
 
 @app.route("/change_password", methods=["POST"])

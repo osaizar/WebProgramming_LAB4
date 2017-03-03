@@ -488,12 +488,16 @@ function reloadMessages() {
           var p = document.createElement('p');
           var b = document.createElement('b');
           var span = document.createElement('span');
-          b.setAttribute("draggable","true");
-          b.setAttribute("ondragstart","drag(event)");
+          b.setAttribute("id","msgContent"+i);
           b.innerHTML = messages[i].content;
+          span.setAttribute("id","msgWriter"+i);
           span.innerHTML = " by " + messages[i].writer;
           p.appendChild(b);
           p.appendChild(span);
+          p.setAttribute("draggable","true");
+          p.setAttribute("ondragstart","drag(event)");
+          p.setAttribute("id","message"+i);
+          //p.innerHTML = messages[i].content + " by " + messages[i].writer;
 
           msgDiv.appendChild(p);
       }
@@ -526,12 +530,16 @@ function reloadOtherUserMessages() {
           var p = document.createElement('p');
           var b = document.createElement('b');
           var span = document.createElement('span');
-          b.setAttribute("draggable","true");
-          b.setAttribute("ondragstart","drag(event)");
+          b.setAttribute("id","msgContent"+i);
           b.innerHTML = messages[i].content;
+          span.setAttribute("id","msgWriter"+i);
           span.innerHTML = " by " + messages[i].writer;
           p.appendChild(b);
           p.appendChild(span);
+          p.setAttribute("draggable","true");
+          p.setAttribute("ondragstart","drag(event)");
+          p.setAttribute("id","message"+i);
+          //p.innerHTML = messages[i].content + " by " + messages[i].writer;
 
           msgDiv.appendChild(p);
       }
@@ -587,16 +595,24 @@ function drag(ev) {
     img.src = "dragImage.png";
     img.style.height = "10px";
     ev.dataTransfer.setDragImage(img, 0, 0);
-    ev.dataTransfer.setData("text", ev.target.innerHTML);
+    var message = ev.target;
+    var messageID = message.id;
+    messageID = messageID.replace("message", "");
+
+    var content = document.getElementById("msgContent"+messageID).innerHTML;
+    var writer = document.getElementById("msgWriter"+messageID).innerHTML;
+    var dragMessage = "\"" + content + "\"" + writer;
+    ev.dataTransfer.setData("text", dragMessage);
+    //ev.dataTransfer.setData("text", ev.target.innerHTML);
 }
 
 
 function drop(ev) {
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    var p = document.createElement('p');
-    p.innerHTML = data;
-    ev.target.appendChild(p);
+    //var p = document.createElement('p');
+    //p.innerHTML = "Response for" + data + ": ";
+    ev.target.appendChild(data);
 }
 
 // END client side functions

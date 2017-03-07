@@ -15,9 +15,6 @@ from User import User
 from Message import Message, MessageList
 from ReturnedData import ReturnedData
 
-
-#TODO: Dividir en archivos
-
 app = Flask(__name__)
 
 LPORT = 8080
@@ -84,8 +81,25 @@ def index():
 
 # END route declarations
 
+def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+# Sends a websocket message to the connected users
+def send_to_websocket(msg, email=False):
+    if email:
+        if email in connected_users:
+            s = connected_users[email]
+            s.send(ReturnedData(False, msg).createJSON())
+    else: # if email is false, the message is broadcast
+        for m, s in connected_users.iteritems():
+            s.send(ReturnedData(False, msg).createJSON())
 
 # START WS functions
+
+"""
+Gets a request from the client and saves the websocket to use it in the
+future.
+"""
 @app.route("/connect")
 def connect():
     try:
@@ -123,6 +137,10 @@ def connect():
     except:
         abort(500)
 
+
+"""
+Returns the number of current users and the connected users.
+"""
 @app.route("/get_current_conn_users")
 def get_current_conn_users():
     try:
@@ -151,7 +169,9 @@ def get_current_conn_users():
     except:
         abort(500)
 
-
+"""
+Returns a list with the connections per hour.
+"""
 @app.route("/get_conn_user_history")
 def get_conn_user_history():
     try:
@@ -179,23 +199,16 @@ def get_conn_user_history():
 
 # END WS functions
 
-def token_generator(size=15, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
+# START HTTP functions
 
-def send_to_websocket(msg, email=False):
-    if email:
-        s = connected_users[email]
-        s.send(ReturnedData(False, msg).createJSON())
-    else:
-        for m, s in connected_users.iteritems():
-            s.send(ReturnedData(False, msg).createJSON())
-
-
-
+"""
+Handles sign ins, checks if the imput data is correct, if so it returns a token
+and stores the user as connected.
+"""
 @app.route("/sign_in", methods=["POST"])
 def sign_in():
     try:
-        data = request.get_json(silent = True)["data"] # get data
+        data = request.get_json(silent = True)["data"]
     except:
         abort(400)
 
@@ -221,7 +234,6 @@ def sign_in():
                 db.delete_session_by_email(data["email"])
 
                 token = token_generator()
-                key = token_generator()
 
                 jToken = {}
                 jToken["token"] = token
@@ -238,14 +250,20 @@ def sign_in():
     except:
         abort(500)
 
+# Creates a session and makes all the clients to update their diagrams
 def create_session(token, userId):
     send_to_websocket("reload:connected")
     return db.create_session(token, userId)
 
+# Inserts a user to the log and makes all the clients to update their diagrams
 def insert_log(userId):
     send_to_websocket("reload:log")
     return db.insert_log(userId)
 
+
+"""
+Checks if sign up data is correct, if so a new user is created.
+"""
 @app.route("/sign_up", methods=["POST"])
 def sign_up():
     try:
@@ -261,7 +279,7 @@ def sign_up():
             return ReturnedData(False, "Email already exists").createJSON()
         else:
             salt = crypto.create_salt()
-            hashed_pw = crypto.get_hash(data["password"], salt)
+            hashed_pw = crypto.get_hash(data["password"], salt) # hash the password with salt
             user = User(data["email"], hashed_pw, salt, data["firstname"],
                         data["familyname"], data["gender"], data["city"], data["country"])
             db.insert_user(user)
@@ -269,6 +287,10 @@ def sign_up():
     except:
         abort(500)
 
+
+"""
+Deletes a user from the session table so it's not longer connected.
+"""
 @app.route("/sign_out", methods=["POST"])
 def sign_out():
     try:
@@ -287,11 +309,16 @@ def sign_out():
     except:
         abort(500)
 
+# Deletes a session and makes all the clients to update their diagrams
 def delete_session_by_email(email):
     send_to_websocket("reload:connected")
     return db.delete_session_by_email(email)
 
 
+"""
+Checks if the password is correct, if so the new password and the new salt are
+stored in the database.
+"""
 @app.route("/change_password", methods=["POST"])
 def change_password():
     try:
@@ -316,6 +343,9 @@ def change_password():
     except:
         abort(500)
 
+"""
+Returns data from the current user.
+"""
 @app.route("/get_user_data", methods=["POST"])
 def get_user_data():
     try:
@@ -335,7 +365,10 @@ def get_user_data():
         abort(500)
 
 
-@app.route("/get_user_data_by_email", methods=["POST"]) #TODO: Name changed, remember to change it on lab3
+"""
+Returns data from a user knowing it's email.
+"""
+@app.route("/get_user_data_by_email", methods=["POST"])
 def get_user_data_by_email():
     try:
         data = request.get_json(silent = True)["data"]
@@ -356,6 +389,10 @@ def get_user_data_by_email():
     except:
         abort(500)
 
+
+"""
+Returns all the messages of the current user
+"""
 @app.route("/get_user_messages", methods=["POST"])
 def get_user_messages():
     try:
@@ -374,7 +411,9 @@ def get_user_messages():
     except:
         abort(500)
 
-
+"""
+Returns all the messages of a user knowing it's email
+"""
 @app.route("/get_user_messages_by_email", methods=["POST"])
 def get_user_messages_by_email():
     try:
@@ -396,6 +435,9 @@ def get_user_messages_by_email():
     except:
         abort(500)
 
+"""
+Sends a message from the current user to a given user.
+"""
 @app.route("/send_message", methods=["POST"])
 def send_message():
     try:
@@ -425,9 +467,10 @@ def send_message():
     except:
         abort(500)
 
+# Inserts a message to the reader and makes him reload the messages
 def insert_message(msg):
-    send_to_websocket("reload:messages", msg.reader)
     db.insert_message(msg)
+    send_to_websocket("reload:messages", msg.reader)
 
 
 if __name__ == "__main__":

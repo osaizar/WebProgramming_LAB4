@@ -11,9 +11,7 @@ class User(object):
         self.gender = gender
         self.password = password
         self.salt = salt
-
-    def User(self):
-        return self
+        
 
     def createJSON(self):
         data = {}

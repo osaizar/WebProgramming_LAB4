@@ -2,13 +2,10 @@ import json
 
 class Message(object):
 
-    def __init__(self, writer, reader, content): #writer and reader are emails
+    def __init__(self, writer, reader, content): # writer and reader are emails
         self.writer = writer
         self.reader = reader
         self.content = content
-
-    def Message(self):
-        return self
 
     def createJSON(self):
         rdata = {}

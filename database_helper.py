@@ -1,17 +1,18 @@
-#!/usr/bin/python
 import sqlite3
 from datetime import datetime
 from User import User
 from Message import Message, MessageList
 
 
-def dict_factory(cursor, row):  # return dictionary instead of tuple
+# return dictionary instead of tuple
+def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
 
 
+# runs a query and returns a cursor with dictionaries
 def run_query(query):
     conn = sqlite3.connect('database.db')
     conn.row_factory = dict_factory  # override function

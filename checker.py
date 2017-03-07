@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from flask import Flask, request, render_template, abort
 import database_helper as db
 import crypto
@@ -15,6 +13,8 @@ from ReturnedData import ReturnedData
 
 MAIL_RE = "[^@]+@[^@]" # something followed by @ followed by something
 
+
+# Checks that the email and the password are in the request
 def check_sign_in_data(data):
     if data == None:
         abort(400)
@@ -28,6 +28,7 @@ def check_sign_in_data(data):
     return True, None
 
 
+# Checks that the neccessary data for the sign up is in the request. And its validity.
 def check_sign_up_data(data):
     if data == None:
         abort(400)
@@ -102,6 +103,7 @@ def check_search_data(data, hmac):
     return True, None
 
 
+# Checks that the HMAC is correct
 def check_HMAC(data, hmac):
     valid, response = check_email(data)
     if not valid:
@@ -116,12 +118,12 @@ def check_HMAC(data, hmac):
         abort(400)
 
     jdata = json.loads(data)
-    token = db.get_session_token_by_email(jdata["email"])
+    token = db.get_session_token_by_email(jdata["email"]) # get stored token
 
     if token == None:
         return False, ReturnedData(False, "You are not logged in!").createJSON()
 
-    generated_hmac = crypto.get_hmac(data, token);
+    generated_hmac = crypto.get_hmac(data, token); # create a hmac with the data and the token
 
     if generated_hmac == None:
         return False, ReturnedData(False, "Ilegal character in message").createJSON()
@@ -132,6 +134,7 @@ def check_HMAC(data, hmac):
     return True, None
 
 
+# check that the data has the users email
 def check_email(data):
     if data == None:
         abort(400)
@@ -144,7 +147,7 @@ def check_email(data):
 
     return True, None
 
-
+# check that the timestamp is correct
 def check_timestamp(data):
     if data == None:
         abort(400)
@@ -153,7 +156,7 @@ def check_timestamp(data):
         if not (data["timestamp"]):
             abort(400)
 
-        timestamp  = int(time.time() / (60*5))
+        timestamp  = int(time.time() / (60*5)) # 5 minutes of margin
 
         if data["timestamp"] != timestamp:
             return False, ReturnedData(False, "The timestamp is not correct").createJSON()

@@ -27,6 +27,10 @@ window.onload = function() {
     displayView();
 };
 
+/*
+Returns HMAC generated with current token and data.
+If there is no token, null will be returned
+*/
 function getHMAC(data){
   var token = localStorage.getItem("token");
   if (token == null || token == "undefined"){
@@ -39,6 +43,10 @@ function getHMAC(data){
 
 // START request handlers
 
+/*
+Creates the JSON from the data and sends a HTTP request to the specified
+URL. A timestamp and the HMAC are added to the request if neccessary.
+*/
 function sendHTTPRequest(data, url, method, onResponse){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     var response = "";
@@ -49,7 +57,7 @@ function sendHTTPRequest(data, url, method, onResponse){
     request["data"] = JSON.stringify(data);
 
     hmac_s = getHMAC(JSON.stringify(data));
-    if (hmac_s != null){
+    if (hmac_s != null){ // if null, we are on a login
       request["hmac"] = hmac_s;
     }
 
@@ -65,9 +73,11 @@ function sendHTTPRequest(data, url, method, onResponse){
     }
 }
 
-
+/*
+Same as sendHTTPRequest but it sends the request to a websocket instead.
+*/
 function sendToWebSocket(data, url, onRespose){
-    var socket = new WebSocket("ws://localhost:8080"+url); //localhost ??
+    var socket = new WebSocket("ws://localhost:8080"+url);
     waitForConnection(function(){
       var jdata = {}
       var hmac_s = "";
@@ -92,7 +102,10 @@ function sendToWebSocket(data, url, onRespose){
     }, socket);
 }
 
-
+/*
+If websocket retuns success = false, this function runs different functions
+depending on the message.
+*/
 function handleSocketMessage(message) {
   switch (message) {
     case "close:session":
@@ -115,7 +128,9 @@ function handleSocketMessage(message) {
   }
 }
 
-
+/*
+Wait until the websocket is active
+*/
 function waitForConnection(callback, socket){
   if(socket.readyState == 1){
     callback();
@@ -126,7 +141,9 @@ function waitForConnection(callback, socket){
   }
 }
 
-
+/*
+Connect to the websocket and store the current session email.
+*/
 function connectToWebSocket(){
   var data = {"email": localStorage.getItem("email")};
   sendToWebSocket(data, "/connect", function(server_msg){
@@ -140,6 +157,7 @@ function connectToWebSocket(){
 
 
 // START diagrams
+
 
 function renderDiagrams() {
   renderConnectedUserDiagram();
@@ -240,7 +258,7 @@ function renderCommentDiagram(messages){
           type:'pie'
         },
     });
-  }else{
+  }else{ // if there is no comments, show "You have no messages"
     var diagram = document.getElementById("diagram2");
     var h4 = document.createElement("h4");
     h4.innerHTML = "You have no messages";
@@ -273,46 +291,14 @@ function signIn() {
     return false;
 }
 
-function showSignInError(message) { // se usa en sigUp y signIn
+
+function showSignInError(message) {
     document.getElementById("messageSignInErr").innerHTML = message;
     document.getElementById("signInError").style.display = "block";
-    //document.getElementById("signInSucc").style.display = "none"; da error
-}
-
-function showSignInSuccess(message) { // se usa en sigUp y signIn
-    document.getElementById("messageSignInSucc").innerHTML = message;
-    document.getElementById("signInSuccess").style.display = "block";
-    document.getElementById("signInError").style.display = "none";
-}
-
-function showSignUpError(message) { // se usa en sigUp y signIn
-    document.getElementById("messageSignUpErr").innerHTML = message;
-    document.getElementById("signUpError").style.display = "block";
-    document.getElementById("signUpSuccess").style.display = "none";
-}
-
-
-function showSignUpSuccess(message) { // se usa en sigUp y signIn
-    document.getElementById("messageSignUpSucc").innerHTML = message;
-    document.getElementById("signUpSuccess").style.display = "block";
-    document.getElementById("signUpError").style.display = "none";
-}
-
-function checkPasswords(type) {
-
-    var password = document.getElementById("s_password");
-    var rpassword = document.getElementById("s_rpassword");
-
-    if (password.value != rpassword.value) {
-        rpassword.setCustomValidity("Passwords do not match!");
-    } else {
-        rpassword.setCustomValidity('');
-    }
 }
 
 
 function signUp() {
-
     var firstname = document.forms["signupForm"]["name"].value;
     var familyname = document.forms["signupForm"]["f-name"].value;
     var gender_select = document.getElementById("gender");
@@ -344,33 +330,57 @@ function signUp() {
 }
 
 
-function signOut() {
+function showSignUpError(message) {
+    document.getElementById("messageSignUpErr").innerHTML = message;
+    document.getElementById("signUpError").style.display = "block";
+    document.getElementById("signUpSuccess").style.display = "none";
+}
 
+
+function showSignUpSuccess(message) {
+    document.getElementById("messageSignUpSucc").innerHTML = message;
+    document.getElementById("signUpSuccess").style.display = "block";
+    document.getElementById("signUpError").style.display = "none";
+}
+
+// Check that the passwords match
+function checkPasswords() {
+    var password = document.getElementById("s_password");
+    var rpassword = document.getElementById("s_rpassword");
+
+    if (password.value != rpassword.value) {
+        rpassword.setCustomValidity("Passwords do not match!");
+    } else {
+        rpassword.setCustomValidity('');
+    }
+}
+
+
+/*
+Tell the server that we want to sign out and delete the stored token and email
+*/
+function signOut() {
     var email = localStorage.getItem("email");
     sendHTTPRequest({"email":email}, "/sign_out", "POST", function(server_msg){
-      if(!server_msg.success){
-        showChangePasswordError(server_msg.message);
-      }
-      localStorage.setItem("token", "undefined"); // TODO: Mirad esto plis
+      localStorage.setItem("token", "undefined");
       localStorage.setItem("email", "undefined");
       displayView();
     });
 }
 
 
-function openUserTab() {
-
-    document.getElementById("userPage").style.display = "block";
-
-}
-
-
 function changePassword() {
-
     var npassword = document.forms["changePassForm"]["new_password"].value;
+    var rnpassword = document.forms["changePassForm"]["rnew_password"].value;
     var cpassword = document.forms["changePassForm"]["current_password"].value;
     var email = localStorage.getItem("email");
     var data = {"email":email, "old_password": cpassword, "new_password": npassword};
+
+    if (npassword != rnpassword){
+      showChangePasswordError("The passwords do not match!");
+      return false;
+    }
+
     sendHTTPRequest(data, "/change_password", "POST", function(server_msg){
       if (!server_msg.success) {
           showChangePasswordError(server_msg.message);
@@ -382,10 +392,9 @@ function changePassword() {
 }
 
 
-function showChangePasswordError(message) { // se usa en signOut tambien
+function showChangePasswordError(message) {
     document.getElementById("messageChPassword").innerHTML = message;
     document.getElementById("chPasswordError").style.display = "block";
-
     document.getElementById("chPasswordSuccess").style.display = "none";
 }
 
@@ -393,13 +402,13 @@ function showChangePasswordError(message) { // se usa en signOut tambien
 function showChangePasswordSuccess(message) {
     document.getElementById("messageChPasswordS").innerHTML = message;
     document.getElementById("chPasswordSuccess").style.display = "block";
-
     document.getElementById("chPasswordError").style.display = "none";
 }
 
-
+/*
+Gets current users information from the server and shows them on the page.
+*/
 function renderCurrentUserPage() {
-
     var email = localStorage.getItem("email");
     var data = {"email":email};
     sendHTTPRequest(data, "/get_user_data", "POST", function(server_msg) {
@@ -422,32 +431,27 @@ function renderCurrentUserPage() {
     });
 }
 
-
+/*
+Sends a message from the current user to the current user.
+*/
 function sendMessage() {
-
     var email = localStorage.getItem("email");
-    sendHTTPRequest({"email":email}, "/get_user_data", "POST", function(server_msg){
-      var data;
+    var msg = document.forms["msgForm"]["message"].value;
 
-      if (server_msg.success) {
-          data = server_msg.data;
-      } else {
-          return -1; //error
-      }
+    document.forms["msgForm"]["message"].value = "";
 
-      var msg = document.forms["msgForm"]["message"].value;
-
-      document.forms["msgForm"]["message"].value = "";
-
-      var server_msg = sendHTTPRequest({"email":email, "msg":msg,"reader": data.email}, "/send_message", "POST", function (server_msg) {
-        reloadMessages();
-        document.getElementById("msgToMe").value = "";
-      });
+    sendHTTPRequest({"email":email, "msg":msg,"reader": email}, "/send_message", "POST", function (server_msg) {
+      reloadMessages();
+      document.getElementById("msgToMe").value = "";
     });
+
     return false;
 }
 
 
+/*
+Sends a message from the current user to another user.
+*/
 function sendMessageTo() {
 
     var email = localStorage.getItem("email");
@@ -461,7 +465,9 @@ function sendMessageTo() {
     return false;
 }
 
-
+/*
+Gets the messages of the current user and renders them on the message box.
+*/
 function reloadMessages() {
 
     var email = localStorage.getItem("email");
@@ -482,7 +488,7 @@ function reloadMessages() {
           var p = document.createElement('p');
           var b = document.createElement('b');
           var span = document.createElement('span');
-          b.setAttribute("id","msgContent"+i);
+          b.setAttribute("id","msgContent"+i); // we need the id to get the data when dragging
           b.innerHTML = messages[i].content;
           span.setAttribute("id","msgWriter"+i);
           span.innerHTML = " by " + messages[i].writer;
@@ -491,16 +497,17 @@ function reloadMessages() {
           p.setAttribute("draggable","true");
           p.setAttribute("ondragstart","drag(event)");
           p.setAttribute("id","message"+i);
-          //p.innerHTML = messages[i].content + " by " + messages[i].writer;
 
           msgDiv.appendChild(p);
       }
 
-      renderCommentDiagram(messages);
+      renderCommentDiagram(messages); // as the messages are updated, the diagram has to render again
     });
 }
 
-
+/*
+Gets the messages of other users and renders them on their message box.
+*/
 function reloadOtherUserMessages() {
 
     var email = localStorage.getItem("email");
@@ -524,7 +531,7 @@ function reloadOtherUserMessages() {
           var p = document.createElement('p');
           var b = document.createElement('b');
           var span = document.createElement('span');
-          b.setAttribute("id","msgContent"+i);
+          b.setAttribute("id","msgContent"+i); // we need the id to get the data when dragging
           b.innerHTML = messages[i].content;
           span.setAttribute("id","msgWriter"+i);
           span.innerHTML = " by " + messages[i].writer;
@@ -533,16 +540,43 @@ function reloadOtherUserMessages() {
           p.setAttribute("draggable","true");
           p.setAttribute("ondragstart","drag(event)");
           p.setAttribute("id","message"+i);
-          //p.innerHTML = messages[i].content + " by " + messages[i].writer;
 
           msgDiv.appendChild(p);
       }
     });
 }
 
+function allowDrop(ev) {
+    ev.preventDefault();
+}
 
+
+function drag(ev) {
+    var img = document.createElement("img");
+    img.src = "dragImage.png"; // image while dragging
+    img.style.height = "10px";
+    ev.dataTransfer.setDragImage(img, 0, 0);
+    var message = ev.target;
+    var messageID = message.id;
+    messageID = messageID.replace("message", "");
+
+    var content = document.getElementById("msgContent"+messageID).innerHTML;
+    var writer = document.getElementById("msgWriter"+messageID).innerHTML;
+    var dragMessage = "\"" + content + "\"" + writer; // shown message
+    ev.dataTransfer.setData("text", dragMessage);
+}
+
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.appendChild(data);
+}
+
+/*
+Gets data of a user using its email and renders their home page
+*/
 function searchUser() {
-
     var email = localStorage.getItem("email");
     var userEmail = document.forms["userSearchForm"]["email"].value;
     sendHTTPRequest({"email":email,"userEmail":userEmail}, "/get_user_data_by_email", "POST", function(server_msg){
@@ -553,8 +587,8 @@ function searchUser() {
       } else {
           document.getElementById("searchError").style.display = "none";
           userData = server_msg.data;
-          renderOtherUserPage(userData);
-          openUserTab();
+          renderOtherUserPage(userData); // we have the data, render home
+          document.getElementById("userPage").style.display = "block";
       }
     });
     return false;
@@ -579,33 +613,6 @@ function renderOtherUserPage(userData) {
     reloadOtherUserMessages();
 }
 
-
-function allowDrop(ev) {
-    ev.preventDefault();
-}
-
-
-function drag(ev) {
-    var img = document.createElement("img");
-    img.src = "dragImage.png";
-    img.style.height = "10px";
-    ev.dataTransfer.setDragImage(img, 0, 0);
-    var message = ev.target;
-    var messageID = message.id;
-    messageID = messageID.replace("message", "");
-
-    var content = document.getElementById("msgContent"+messageID).innerHTML;
-    var writer = document.getElementById("msgWriter"+messageID).innerHTML;
-    var dragMessage = "\"" + content + "\"" + writer;
-    ev.dataTransfer.setData("text", dragMessage);
-}
-
-
-function drop(ev) {
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData("text");
-    ev.target.appendChild(data);
-}
 
 // END client side functions
 

@@ -89,6 +89,7 @@ def change_user_password(userId, password, salt):
     else:
         return False
 
+
 def get_user_number():
     cur = run_query("SELECT COUNT(*) as 'count' FROM User")
     result = cur.fetchone()
@@ -178,6 +179,7 @@ def get_messages_by_user(userId):
 
     return msgs
 
+
 def insert_log(userId):
         cur = run_query("INSERT INTO Log (date, userId)\
                         VALUES ('%s',%s)" % (str(datetime.now()), userId))
@@ -186,6 +188,7 @@ def insert_log(userId):
         else:
             return False
 
+
 def get_logs_between(date1, date2):
     cur = run_query("SELECT COUNT(*) as 'count' from Log WHERE date > '%s' \
                     and '%s' > date" % (date1, date2))
@@ -193,6 +196,7 @@ def get_logs_between(date1, date2):
     result = cur.fetchone()
 
     return result["count"]
+
 
 def get_today_logs():
     today = str(datetime.now()).split(" ")[0]

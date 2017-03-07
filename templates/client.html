@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Twidder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="lib/c3-0.4.11/c3.min.css" rel="stylesheet" type="text/css">
     <link href="lib/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
@@ -97,14 +98,24 @@
       <nav class="navbar navbar-inverse bg-primary">
           <!-- navbar section -->
           <div class="container-fluid">
-              <ul class="nav navbar-nav">
-                  <li class="active"> <a data-toggle="tab" id="navHome" href="#home">Home</a></li>
-                  <li> <a data-toggle="tab" id="navBrowse" href="#browse">Browse</a></li>
-                  <li> <a data-toggle="tab" id="navAccount" href="#account">Account</a></li>
-              </ul>
-              <ul class="nav navbar-nav navbar-right">
-                  <li><a id="logout" href="javascript:void(0)">Logout</a></li>
-              </ul>
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Twidder</a>
+              </div>
+              <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"> <a data-toggle="tab" id="navHome" href="#home">Home</a></li>
+                    <li> <a data-toggle="tab" id="navBrowse" href="#browse">Browse</a></li>
+                    <li> <a data-toggle="tab" id="navAccount" href="#account">Account</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a id="logout" href="javascript:void(0)">Logout</a></li>
+                </ul>
+              </div>
           </div>
       </nav>
       <!-- END navbar section -->

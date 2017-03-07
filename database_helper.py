@@ -21,15 +21,6 @@ def run_query(query):
     return cur
 
 
-def create_tables():
-    qry = open('database.schema', 'r').read()
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute(qry)
-    conn.commit()
-    c.close()
-    conn.close()
-
 # Public functions
 
 

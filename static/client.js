@@ -476,9 +476,7 @@ function reloadMessages() {
 
       var msgDiv = document.getElementById("userMessageDiv");
 
-      while (msgDiv.firstChild) {
-          msgDiv.removeChild(msgDiv.firstChild);
-      }
+      msgDiv.innerHTML = "";
 
       for (var i = 0; i < messages.length; i++) {
           var p = document.createElement('p');

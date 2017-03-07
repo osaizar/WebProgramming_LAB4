@@ -6,14 +6,14 @@ from random import randint
 import time
 
 pathIsma = '/home/isma/Isma/UNI/WEBPROGRAMMING/WebProgramming_LAB4/testing/chromedriver'
-pathOier = '/home/osaizar/MEGAsync/3.kursoa/Web programming/LAB/testing/WebProgramming_LAB4/chromedriver'
+pathOier = '/home/osaizar/MEGAsync/3.kursoa/Web programming/LAB/WebProgramming_LAB4/testing/chromedriver'
 
 
 
 class PythonOrgSearch(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Chrome(pathIsma)
+        self.driver = webdriver.Chrome(pathOier)
 
     def testTwidder(self):
         driver = self.driver
